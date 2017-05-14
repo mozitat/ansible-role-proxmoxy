@@ -28,10 +28,10 @@
     create: yes
   with_dict: "{{ proxmoxy_host_modules }}"
 
-  - name: Host > modprobe kernel modules now
-    modprobe: name='{{ item.value }}'
+- name: Host > modprobe kernel modules now
+  modprobe:
+    name: "{{ item.value }}"
   with_dict: "{{ proxmoxy_host_modules }}"
-
 
 - name: Host > remove proxmox ui no-subscription warning message
   lineinfile:
