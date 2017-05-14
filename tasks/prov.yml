@@ -25,7 +25,7 @@
   proxmox_prov:
     state: "{{ item.state|default('present') }}"
     vmid: "{{ item.vmid }}"
-    password: "{{ item.password|default(omit) }}"
+    password: "{{ lookup('password', secret|d('secret') + '/cred/' + ansible_fqdn + '/root/pw length=20') if proxmoxy_provision_secret else item.password|default(omit) }}"
     hostname: "{{ item.hostname|default('newlxc') }}"
     ostemplate: "{{ proxmoxy_templates_dir }}/{{ __proxmoxy_ct_template_match[item.vmid]|default(omit) }}"
     arch: "{{ item.arch|default(omit) }}"
@@ -87,12 +87,12 @@
 
 - name: Provision > execute commands on new containers
   shell: >
-    echo {{ item[1] }} | pct enter {{ item[0].item.vmid|d() }}
+    echo '{{ item[1] }}' | pct enter {{ item[0].item.vmid|d() }}
   when: item[0] and item[0].item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines
   with_nested:
     - "{{ __proxmoxy_register_containers.results|d([]) }}"
     - "{{ proxmoxy_provision_post_cmds|d([]) }}"
-
+  
 - name: Provision > stop new containers, unless onboot
   shell: >
     pct stop {{ item.item.vmid|d() }}
