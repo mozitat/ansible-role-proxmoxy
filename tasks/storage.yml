@@ -4,7 +4,7 @@
 # Limitation: Always or never sets values for existing storage. (depends on variable)
 # pvesm Bug ? currently pvesm does not list disabled storage 
 
-- name: Storage > get storage list 1
+- name: Storage > get storage list before remove
   command: pvesm status
   register: __proxmoxy_storage_status
   changed_when: false
@@ -17,7 +17,7 @@
   when: >
     item and __proxmoxy_storage_status.stdout | search( '[\nn]' ~ item ~ '\s+')
 
-- name: Storage > get storage list 2
+- name: Storage > get storage list after remove
   command: pvesm status
   register: __proxmoxy_storage_status
   changed_when: false
@@ -38,6 +38,10 @@
   when: >
     item and item.type == 'zfspool' and ( proxmoxy_storage_changes or not __proxmoxy_storage_status.stdout |
         search( "{0}\s+{1}\s+{2}".format(item.id|default(omit), item.type|default(omit), 0 if item.disable|d(0)|int else 1)) )
+  # how i could let create on already defined not fail.
+  # register: command_result
+  # failed_when: "command_result.rc != 0 and 'already defined' not in command_result.stderr"
+  # changed_when: "command_result.rc == 0"
 
 # Differ between add/set in 2 less complex tasks.
 - name: Storage > create type dir
@@ -95,6 +99,14 @@
   when: >
     item and item.type == 'nfs' and proxmoxy_storage_changes and 
     __proxmoxy_storage_status.stdout | search( item.id ~ '\s+' ~ item.type )
+
+
+# Alternative idea from: https://github.com/reminec/ansible-role-proxmox/blob/master/tasks/storage.yml
+# only write 1 pvesm.yml file and include it with a loop
+# - name: storage > Setup storages (Only LVM)
+#   include: pvesm.yml
+#   with_items: '{{ proxmox_storages }}'
+#   when: item.type == 'lvm'
 
 
 # Idea for implementation: get config for single config and call set only if changes.
