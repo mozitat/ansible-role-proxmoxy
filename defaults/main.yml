@@ -1,5 +1,13 @@
 ---
 
+## Host system
+proxmoxy_host_modules: {}  # load kernel modules at boot.
+# { lm-sensors: w83627ehf }
+proxmoxy_host_tuntap: True  # enable tun/tap for lxc CTs.
+proxmoxy_host_remove_nosubnag: True  # remove no subscription login message.
+proxmoxy_host_repo_enterprise: False  # remove enterprise apt repo if false
+proxmoxy_host_repo_nosubs: True  # enable no-subscription repo
+
 ## Templates
 proxmoxy_templates_storage: "local"
 proxmoxy_templates_dir: "/var/lib/vz/template/cache"  # or local:vztmpl
