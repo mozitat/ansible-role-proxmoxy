@@ -96,6 +96,6 @@
 - name: Provision > stop new containers, unless onboot
   shell: >
     pct stop {{ item.item.vmid|d() }}
-  when: item and (item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines) and not item.item.onboot|d(False)
+  when: item and (item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines) and not item.item.onboot|d(False)|bool
   with_items:
     - "{{ __proxmoxy_register_containers.results|d([]) }}"
