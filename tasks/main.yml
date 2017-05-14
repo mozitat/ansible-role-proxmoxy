@@ -5,12 +5,17 @@
   tags:
     - proxmoxy
 
-# # Storage
-# - include: storage.yml
-#   tags:
-#     - proxmoxy
+# Permissions
+- include: permission.yml
+  tags:
+    - proxmoxy
 
-Provisioning
+# # Storage
+- include: storage.yml
+  tags:
+    - proxmoxy
+
+# Provisioning
 - include: prov.yml
   tags:
     - proxmoxy

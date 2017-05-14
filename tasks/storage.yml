@@ -1,0 +1,103 @@
+---
+
+## manage/create Storage of type nfs, dir and zfspool
+# Limitation: Always or never sets values for existing storage. (depends on variable)
+# pvesm Bug ? currently pvesm does not list disabled storage 
+
+- name: Storage > get storage list 1
+  command: pvesm status
+  register: __proxmoxy_storage_status
+  changed_when: false
+
+- name: Storage > remove storages
+  shell: >
+    pvesm remove {{ item }}
+  with_items: "{{ proxmoxy_storage_remove }}"
+  # not sure if \n in string from above is evaluated
+  when: >
+    item and __proxmoxy_storage_status.stdout | search( '[\nn]' ~ item ~ '\s+')
+
+- name: Storage > get storage list 2
+  command: pvesm status
+  register: __proxmoxy_storage_status
+  changed_when: false
+
+# Show complex task, differ between set/add in 1 task.
+- name: Storage > create type zfspool
+  shell: >
+    pvesm {{ 'set ' ~ item.id if proxmoxy_storage_changes|d(True) and __proxmoxy_storage_status.stdout|search(item.id ~ '\s+' ~ item.type)
+    else
+      'add ' ~ item.type ~ ' ' ~ item.id ~ (' -pool "' ~ item.pool ~ '"') if item.pool is defined else ''
+    }}
+    {{ (' -blocksize "' ~ item.blocksize ~ '"') if item.blocksize|d(None) else '' }}
+    {{ ' -sparse "' ~ item.sparse|int|d(1) ~ '"' }}
+    {{ (' -nodes "' ~ item.nodes|d(proxmoxy_storage_nodes)|sort|join(',') ~ '"') if item.nodes|d(proxmoxy_storage_nodes) else '' }}
+    {{ (' -content "' ~ item.content|d(proxmoxy_storage_content)|sort|join(',') ~ '"') }}
+    {{ ' -disable "' ~ item.disable|d(0) ~ '"' }}
+  with_items: "{{ proxmoxy_storage }}"
+  when: >
+    item and item.type == 'zfspool' and ( proxmoxy_storage_changes or not __proxmoxy_storage_status.stdout |
+        search( "{0}\s+{1}\s+{2}".format(item.id|default(omit), item.type|default(omit), 0 if item.disable|d(0)|int else 1)) )
+
+# Differ between add/set in 2 less complex tasks.
+- name: Storage > create type dir
+  shell: >
+    pvesm add {{ item.type }} {{ item.id }}
+    {{ (' -path "' ~ item.path ~ '"') if item.path is defined else '' }}
+    {{ (' -maxfiles "' ~ item.maxfiles ~ '"') if item.maxfiles|d(None) else '' }}
+    {{ ' -shared "' ~ item.shared|d(0)|int ~ '"' }}
+    {{ (' -nodes "' ~ item.nodes|d(proxmoxy_storage_nodes)|sort|join(',') ~ '"') if item.nodes|d(proxmoxy_storage_nodes) else '' }}
+    {{ (' -content "' ~ item.content|d(proxmoxy_storage_content)|sort|join(',') ~ '"') }}
+    {{ ' -disable "' ~ item.disable|d(0) ~ '"' }}
+  with_items: "{{ proxmoxy_storage }}"
+  when: >
+    item and item.type == 'dir' and not __proxmoxy_storage_status.stdout |
+    search( "{0}\s+{1}\s+{2}".format(item.id|default(omit), item.type|default(omit), 0 if item.disable|d(0)|int else 1))
+
+- name: Storage > set type dir
+  shell: >
+    pvesm set {{ item.id }}
+    {{ (' -maxfiles "' ~ item.maxfiles ~ '"') if item.maxfiles|d(None) else '' }}
+    {{ ' -shared "' ~ item.shared|d(0)|int ~ '"' }}
+    {{ (' -nodes "' ~ item.nodes|d(proxmoxy_storage_nodes)|sort|join(',') ~ '"') if item.nodes|d(proxmoxy_storage_nodes) else '' }}
+    {{ (' -content "' ~ item.content|d(proxmoxy_storage_content)|sort|join(',') ~ '"') }}
+    {{ ' -disable "' ~ item.disable|d(0) ~ '"' }}
+  with_items: "{{ proxmoxy_storage }}"
+  when: >
+    item and item.type == 'dir' and proxmoxy_storage_changes and 
+    __proxmoxy_storage_status.stdout | search( item.id ~ '\s+' ~ item.type )
+
+- name: Storage > create type nfs
+  shell: >
+    pvesm add {{ item.type }} {{ item.id }}
+    {{ (' -server "' ~ item.server ~ '"') if item.server is defined else '' }}
+    {{ (' -export "' ~ item.export ~ '"') if item.export is defined else '' }}
+    {{ (' -path "' ~ item.path ~ '"') if item.path is defined else '' }}
+    {{ (' -options "' ~ item.options ~ '"') if item.options is defined else '' }}
+    {{ (' -maxfiles "' ~ item.maxfiles ~ '"') if item.maxfiles|d(None) else '' }}
+    {{ (' -nodes "' ~ item.nodes|d(proxmoxy_storage_nodes)|sort|join(',') ~ '"') if item.nodes|d(proxmoxy_storage_nodes) else '' }}
+    {{ (' -content "' ~ item.content|d(proxmoxy_storage_content)|sort|join(',') ~ '"') }}
+    {{ ' -disable "' ~ item.disable|d(0) ~ '"' }}
+  with_items: "{{ proxmoxy_storage }}"
+  when: >
+    item and item.type == 'nfs' and not __proxmoxy_storage_status.stdout |
+    search( "{0}\s+{1}\s+{2}".format(item.id|default(omit), item.type|default(omit), 0 if item.disable|d(0)|int else 1))
+
+- name: Storage > set type nfs
+  shell: >
+    pvesm set {{ item.id }}
+    {{ (' -options "' ~ item.options ~ '"') if item.options is defined else '' }}
+    {{ (' -maxfiles "' ~ item.maxfiles ~ '"') if item.maxfiles|d(None) else '' }}
+    {{ (' -nodes "' ~ item.nodes|d(proxmoxy_storage_nodes)|sort|join(',') ~ '"') if item.nodes|d(proxmoxy_storage_nodes) else '' }}
+    {{ (' -content "' ~ item.content|d(proxmoxy_storage_content)|sort|join(',') ~ '"') }}
+    {{ ' -disable "' ~ item.disable|d(0) ~ '"' }}
+  with_items: "{{ proxmoxy_storage }}"
+  when: >
+    item and item.type == 'nfs' and proxmoxy_storage_changes and 
+    __proxmoxy_storage_status.stdout | search( item.id ~ '\s+' ~ item.type )
+
+
+# Idea for implementation: get config for single config and call set only if changes.
+## TBD set options in local_fact like debops?
+# sed for getting 1 storage config: sed -n '/^\w\+: tank$/,/^$/p' storage.cfg | grep "^\W"
+# Problem: How to get into fact dict {id: xxx, config: "xxx"}? Would have to workaround with additional command calls?
