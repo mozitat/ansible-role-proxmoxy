@@ -1,6 +1,7 @@
 ---
 
 ## manage/create Storage of type nfs, dir and zfspool
+
 # Limitation: Always or never sets values for existing storage. (depends on variable)
 # pvesm Bug ? currently pvesm does not list disabled storage 
 
@@ -22,87 +23,57 @@
   register: __proxmoxy_storage_status
   changed_when: false
 
-# Show complex task, differ between set/add in 1 task.
-- name: Storage > create type zfspool
-  shell: >
-    pvesm {{ 'set ' ~ item.id if proxmoxy_storage_changes|d(True) and __proxmoxy_storage_status.stdout|search(item.id ~ '\s+' ~ item.type)
-    else
-      'add ' ~ item.type ~ ' ' ~ item.id ~ (' -pool "' ~ item.pool ~ '"') if item.pool is defined else ''
-    }}
-    {{ (' -blocksize "' ~ item.blocksize ~ '"') if item.blocksize|d(None) else '' }}
-    {{ ' -sparse "' ~ item.sparse|int|d(1) ~ '"' }}
-    {{ (' -nodes "' ~ item.nodes|d(proxmoxy_storage_nodes)|sort|join(',') ~ '"') if item.nodes|d(proxmoxy_storage_nodes) else '' }}
-    {{ (' -content "' ~ item.content|d(proxmoxy_storage_content)|sort|join(',') ~ '"') }}
-    {{ ' -disable "' ~ item.disable|d(0) ~ '"' }}
-  with_items: "{{ proxmoxy_storage }}"
-  when: >
-    item and item.type == 'zfspool' and ( proxmoxy_storage_changes or not __proxmoxy_storage_status.stdout |
-        search( "{0}\s+{1}\s+{2}".format(item.id|default(omit), item.type|default(omit), 0 if item.disable|d(0)|int else 1)) )
-  # how i could let create on already defined not fail.
-  # register: command_result
-  # failed_when: "command_result.rc != 0 and 'already defined' not in command_result.stderr"
-  # changed_when: "command_result.rc == 0"
-
-# Differ between add/set in 2 less complex tasks.
-- name: Storage > create type dir
+- name: Storage > create storage
   shell: >
     pvesm add {{ item.type }} {{ item.id }}
-    {{ (' -path "' ~ item.path ~ '"') if item.path is defined else '' }}
-    {{ (' -maxfiles "' ~ item.maxfiles ~ '"') if item.maxfiles|d(None) else '' }}
-    {{ ' -shared "' ~ item.shared|d(0)|int ~ '"' }}
-    {{ (' -nodes "' ~ item.nodes|d(proxmoxy_storage_nodes)|sort|join(',') ~ '"') if item.nodes|d(proxmoxy_storage_nodes) else '' }}
-    {{ (' -content "' ~ item.content|d(proxmoxy_storage_content)|sort|join(',') ~ '"') }}
+    {#- nfs -#}
+    {{ ' -server "' ~ item.server ~ '"' if item.server is defined else '' }}
+    {{ ' -export "' ~ item.export ~ '"' if item.export is defined else '' }}
+    {{ ' -path "' ~ item.path ~ '"' if item.path is defined else '' }}
+    {{ ' -options "' ~ item.options ~ '"' if item.options is defined else '' }}
+    {#- zfs (no maxfiles) -#}
+    {{ ' -pool "' ~ item.pool ~ '"' if item.pool is defined else '' }}
+    {{ ' -blocksize "' ~ item.blocksize ~ '"' if item.blocksize|d(None) else '' }}
+    {{ ' -sparse "' ~ item.sparse|int ~ '"' if item.sparse is defined else '' }}
+    {#- dir (uses path too) -#}
+    {{ ' -shared "' ~ item.shared|int ~ '"' if item.shared is defined else '' }}
+    {#- common -#}
+    {{ ' -maxfiles "' ~ item.maxfiles ~ '"' if item.maxfiles|d(None) else '' }}
+    {{ ' -nodes "' ~ item.nodes|d(proxmoxy_storage_nodes)|sort|join(',') ~ '"' if item.nodes|d(proxmoxy_storage_nodes) else '' }}
+    {{ ' -content "' ~ item.content|d(proxmoxy_storage_content)|sort|join(',') ~ '"' }}
     {{ ' -disable "' ~ item.disable|d(0) ~ '"' }}
   with_items: "{{ proxmoxy_storage }}"
   when: >
-    item and item.type == 'dir' and not __proxmoxy_storage_status.stdout |
-    search( "{0}\s+{1}\s+{2}".format(item.id|default(omit), item.type|default(omit), 0 if item.disable|d(0)|int else 1))
+    item and not __proxmoxy_storage_status.stdout |
+    search( "{0}\s+{1}\s".format(item.id|default(omit), item.type|default(omit)))
+  # how create on already defined would not fail the playbook.
+  # register: __result
+  # failed_when: "__result.rc != 0 and 'already defined' not in __result.stderr"
+  # changed_when: "__result.rc == 0"
 
-- name: Storage > set type dir
+- name: Storage > set storage options if {{ proxmoxy_storage_changes }}
   shell: >
     pvesm set {{ item.id }}
-    {{ (' -maxfiles "' ~ item.maxfiles ~ '"') if item.maxfiles|d(None) else '' }}
-    {{ ' -shared "' ~ item.shared|d(0)|int ~ '"' }}
-    {{ (' -nodes "' ~ item.nodes|d(proxmoxy_storage_nodes)|sort|join(',') ~ '"') if item.nodes|d(proxmoxy_storage_nodes) else '' }}
-    {{ (' -content "' ~ item.content|d(proxmoxy_storage_content)|sort|join(',') ~ '"') }}
+    {#- nfs -#}
+    {{ ' -options "' ~ item.options ~ '"' if item.options is defined else '' }}
+    {#- zfs (no maxfiles) -#}
+    {{ ' -blocksize "' ~ item.blocksize ~ '"' if item.blocksize|d(None) else '' }}
+    {{ ' -sparse "' ~ item.sparse|int ~ '"' if item.sparse is defined else '' }}
+    {#- dir (uses path too) -#}
+    {{ ' -shared "' ~ item.shared|int ~ '"' if item.shared is defined else '' }}
+    {#- common -#}
+    {{ ' -maxfiles "' ~ item.maxfiles ~ '"' if item.maxfiles|d(None) else '' }}
+    {{ ' -nodes "' ~ item.nodes|d(proxmoxy_storage_nodes)|sort|join(',') ~ '"' if item.nodes|d(proxmoxy_storage_nodes) else '' }}
+    {{ ' -content "' ~ item.content|d(proxmoxy_storage_content)|sort|join(',') ~ '"' }}
     {{ ' -disable "' ~ item.disable|d(0) ~ '"' }}
   with_items: "{{ proxmoxy_storage }}"
   when: >
-    item and item.type == 'dir' and proxmoxy_storage_changes and 
-    __proxmoxy_storage_status.stdout | search( item.id ~ '\s+' ~ item.type )
-
-- name: Storage > create type nfs
-  shell: >
-    pvesm add {{ item.type }} {{ item.id }}
-    {{ (' -server "' ~ item.server ~ '"') if item.server is defined else '' }}
-    {{ (' -export "' ~ item.export ~ '"') if item.export is defined else '' }}
-    {{ (' -path "' ~ item.path ~ '"') if item.path is defined else '' }}
-    {{ (' -options "' ~ item.options ~ '"') if item.options is defined else '' }}
-    {{ (' -maxfiles "' ~ item.maxfiles ~ '"') if item.maxfiles|d(None) else '' }}
-    {{ (' -nodes "' ~ item.nodes|d(proxmoxy_storage_nodes)|sort|join(',') ~ '"') if item.nodes|d(proxmoxy_storage_nodes) else '' }}
-    {{ (' -content "' ~ item.content|d(proxmoxy_storage_content)|sort|join(',') ~ '"') }}
-    {{ ' -disable "' ~ item.disable|d(0) ~ '"' }}
-  with_items: "{{ proxmoxy_storage }}"
-  when: >
-    item and item.type == 'nfs' and not __proxmoxy_storage_status.stdout |
-    search( "{0}\s+{1}\s+{2}".format(item.id|default(omit), item.type|default(omit), 0 if item.disable|d(0)|int else 1))
-
-- name: Storage > set type nfs
-  shell: >
-    pvesm set {{ item.id }}
-    {{ (' -options "' ~ item.options ~ '"') if item.options is defined else '' }}
-    {{ (' -maxfiles "' ~ item.maxfiles ~ '"') if item.maxfiles|d(None) else '' }}
-    {{ (' -nodes "' ~ item.nodes|d(proxmoxy_storage_nodes)|sort|join(',') ~ '"') if item.nodes|d(proxmoxy_storage_nodes) else '' }}
-    {{ (' -content "' ~ item.content|d(proxmoxy_storage_content)|sort|join(',') ~ '"') }}
-    {{ ' -disable "' ~ item.disable|d(0) ~ '"' }}
-  with_items: "{{ proxmoxy_storage }}"
-  when: >
-    item and item.type == 'nfs' and proxmoxy_storage_changes and 
+    item and proxmoxy_storage_changes and 
     __proxmoxy_storage_status.stdout | search( item.id ~ '\s+' ~ item.type )
 
 
 # Alternative idea from: https://github.com/reminec/ansible-role-proxmox/blob/master/tasks/storage.yml
-# only write 1 pvesm.yml file and include it with a loop
+# only write a pvesm.yml file and include it with a loop
 # - name: storage > Setup storages (Only LVM)
 #   include: pvesm.yml
 #   with_items: '{{ proxmox_storages }}'
