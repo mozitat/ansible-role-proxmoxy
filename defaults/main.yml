@@ -52,7 +52,18 @@ proxmoxy_storage_remove: []  # storages to remove. Place here to recreate anew.
 #   options: 'vers=3,soft', maxfiles: 7, }
 
 ## Provision lxc containers
-proxmoxy_provision_secret: False  # read/save password 
+proxmoxy_provision_secret: True  # read/save password 
 proxmoxy_provision_containers: []  # list of container configs
+# minimal cfg with network
+# - vmid: 101
+#   state: present
+#   ostemplate: "centos-7.*"
+#   storage: local-zfs
+#   hostname: lxc101
+#   net0:
+#     name: eth0
+#     bridge: vmbr0  # mandatory
+#     ip: 10.0.0.11/24
+#     gw: 10.0.0.1
 proxmoxy_provision_post_cmds: []  # run commands in new containers, you may use double quotes. (but MUST not use single quotes)
-#  - yum -y install openssh-server
+#  - yum -y install openssh-server; systemctl start sshd
