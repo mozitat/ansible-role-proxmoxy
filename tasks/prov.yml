@@ -92,7 +92,8 @@
   with_nested:
     - "{{ __proxmoxy_register_containers.results|d([]) }}"
     - "{{ proxmoxy_provision_post_cmds|d([]) }}"
-  
+  ignore_errors: True
+
 - name: Provision > stop new containers, unless onboot
   shell: >
     pct stop {{ item.item.vmid|d() }}
