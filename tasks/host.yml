@@ -41,10 +41,12 @@
     backrefs: yes
   when: proxmoxy_host_remove_nosubnag
 
+# tbd lxc.mount.entry = /dev/net dev/net none bind,create=dir
 - name: Host > enable tun/tap device in lxc
   lineinfile:
-    dest: /etc/lxc/default.conf
+    dest: /usr/share/lxc/config/common.conf.d/20-tuntap.conf
     regexp: "^lxc.cgroup.devices.allow"
     line: "lxc.cgroup.devices.allow = c 10:200 rwm"
+    create: yes
     state: present
   when: proxmoxy_host_tuntap
