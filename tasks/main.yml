@@ -1,2 +1,16 @@
 ---
-# tasks file for .
+
+# Templates
+- include: templates.yml
+  tags:
+    - proxmoxy
+
+# # Storage
+# - include: storage.yml
+#   tags:
+#     - proxmoxy
+
+Provisioning
+- include: prov.yml
+  tags:
+    - proxmoxy

@@ -34,7 +34,7 @@
 ## Create new VM on existing disk (subvol must exist)
 pvesh create /nodes/moximoz/lxc -vmid=302 -ostemplate=/var/lib/vz/template/cache/centos-7-default_20161207_amd64.tar.xz -storage=local-zfs -rootfs=local-zfs:subvol-302-exists-1,acl=1,size=4G
 
-## Diverse unsortierte commands
+## misc unsorted commands
 
     pvesh get /cluster/nextid
     pvesh get /cluster/resources

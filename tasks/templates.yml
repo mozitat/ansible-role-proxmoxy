@@ -1,0 +1,22 @@
+---
+
+- name: Templates > update PVE template list
+  command: pveam update
+  when: proxmoxy_templates_update
+
+- name: Templates > find available
+  shell: pveam available | awk '{print $2}'
+  changed_when: false
+  register: __proxmoxy_templates_all_list
+
+- name: Templates > filter available list
+  set_fact:
+    __proxmoxy_templates_list: "{{ __proxmoxy_templates_list|default([]) + __proxmoxy_templates_all_list.stdout_lines|select('search', item)|sort }}"
+  # changed_when: false
+  with_items: "{{ proxmoxy_templates }}"
+
+- name: Templates > download matching templates
+  shell: >
+    pveam download {{ proxmoxy_templates_storage|default('local') }} {{ item }}
+    creates={{ proxmoxy_templates_dir }}/{{ item }}
+  with_items: "{{ __proxmoxy_templates_list }}"

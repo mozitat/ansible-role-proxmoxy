@@ -1,2 +1,23 @@
 ---
-# defaults file for .
+
+# Templates
+proxmoxy_templates_storage: "local"
+proxmoxy_templates_dir: "/var/lib/vz/template/cache"  # or local:vztmpl
+# can use regex pattern
+proxmoxy_templates_default: "centos-7"
+# Should pveam update be called always?
+proxmoxy_templates_update: False
+# pveam download templates, can use regex, i.e. ['centos-7-default', 'debian-8..-standard']
+# cave: the list contains turnkey templates as  well
+proxmoxy_templates: []
+
+# Permissions, Users
+proxmoxy_permission_groups: {}
+proxmoxy_permission_users: {}
+
+
+# Proxmox storage
+# tbd
+
+# Provision lxc containers
+proxmoxy_containers: []

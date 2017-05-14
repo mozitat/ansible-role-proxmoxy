@@ -1,0 +1,67 @@
+---
+
+# TODO TBD if this should be moved to templates task
+- name: templates > find files
+  command: "find -type f -printf '%P\n'"
+  args:
+    chdir: "{{ proxmoxy_templates_dir }}"
+  changed_when: false
+  register: __proxmoxy_templates_find_result
+
+# Compute the right ostemplate file for every container.
+# ostemplate can contain a (regex) pattern to match the filename, i.e. "centos-7.*20160404.*"
+# complicated statement, therefor outsourced to its own set_fact var
+- name: provision > populate matching templates for all containers
+  set_fact:
+    __proxmoxy_ct_template_match: "{{ __proxmoxy_ct_template_match|default({}) | combine( {item.vmid: __proxmoxy_templates_find_result.stdout_lines|select('search', item.ostemplate|default(proxmoxy_templates_default))|sort|last|string} ) }}"
+  with_items: "{{ proxmoxy_containers }}"
+
+- name: provision > configure lxc container
+  proxmox_prov:
+    state: "{{ item.state|default('present') }}"
+    vmid: "{{ item.vmid }}"
+    password: "{{ item.password|default(omit) }}"
+    hostname: "{{ item.hostname|default('newlxc') }}"
+    ostemplate: "{{ proxmoxy_templates_dir }}/{{ __proxmoxy_ct_template_match[item.vmid]|default(omit) }}"
+    arch: "{{ item.arch|default(omit) }}"
+    cmode: "{{ item.cmode|default(omit) }}"
+    console: "{{ item.console|default(omit) }}"
+    cores: "{{ item.cores|default(omit) }}"
+    cpuunits: "{{ item.cpuunits|default(omit) }}"
+    description: "{{ item.description|default(omit) }}"
+    memory: "{{ item.memory|default(omit) }}"
+    mp0: "{{ item.mp0|default(omit) }}"
+    mp1: "{{ item.mp1|default(omit) }}"
+    mp2: "{{ item.mp2|default(omit) }}"
+    mp3: "{{ item.mp3|default(omit) }}"
+    mp4: "{{ item.mp4|default(omit) }}"
+    mp5: "{{ item.mp5|default(omit) }}"
+    mp6: "{{ item.mp6|default(omit) }}"
+    mp7: "{{ item.mp7|default(omit) }}"
+    mp8: "{{ item.mp8|default(omit) }}"
+    mp9: "{{ item.mp9|default(omit) }}"
+    net0: "{{ item.net0|default(omit) }}"
+    net1: "{{ item.net1|default(omit) }}"
+    net2: "{{ item.net2|default(omit) }}"
+    net3: "{{ item.net3|default(omit) }}"
+    net4: "{{ item.net4|default(omit) }}"
+    net5: "{{ item.net5|default(omit) }}"
+    net6: "{{ item.net6|default(omit) }}"
+    net7: "{{ item.net7|default(omit) }}"
+    net8: "{{ item.net8|default(omit) }}"
+    net9: "{{ item.net9|default(omit) }}"
+    node: "{{ item.node|default(omit) }}"
+    onboot: "{{ item.onboot|default(omit) }}"
+    ostype: "{{ item.ostype|default(omit) }}"
+    pool: "{{ item.pool|default(omit) }}"
+    protection: "{{ item.protection|default(omit) }}"
+    rootfs: "{{ item.rootfs|default(omit) }}"
+    searchdomain: "{{ item.searchdomain|default(omit) }}"
+    ssh_public_keys: "{{ item.ssh_public_keys|default(omit) }}"
+    startup: "{{ item.startup|default(omit) }}"
+    storage: "{{ item.storage|default(omit) }}"
+    swap: "{{ item.swap|default(omit) }}"
+    tty: "{{ item.tty|default(omit) }}"
+    unprivileged: "{{ item.unprivileged|default(omit) }}"
+
+  with_items: "{{ proxmoxy_containers }}"
