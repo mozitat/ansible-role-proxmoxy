@@ -1,0 +1,67 @@
+---
+
+# Manage Permissions, Groups, Users
+- name: Permission > get user config from file
+  command: cat /etc/pve/user.cfg
+  register: __proxmoxy_users
+  changed_when: false
+
+# Kind of hackyish solution for differentiating between groupmod/groupadd
+- name: Permission > create/modify groups
+  shell: >
+    cmd=groupadd; if grep -q "^group:{{ item.name }}" /etc/pve/user.cfg; then cmd=groupmod; fi;
+    pveum $cmd {{ item.name }}
+    {{ (' -comment "' ~ item.comment + '"') if item.comment is defined else '' }}
+  with_items: "{{ proxmoxy_permission_groups }}"
+  when: item and not __proxmoxy_users.stdout | search("group:" + item.name|default(omit) + ":[^:]*:" + item.comment|default('[^:]') + ":")
+
+# Better solution for useradd/usermod problem.
+- name: Permission > create/modify users
+  shell: >
+    pveum {{ 'usermod' if 'user:' ~ item.name in __proxmoxy_users.stdout else 'useradd'  }} {{ item.name }}
+    {{ (' -comment "' ~ item.comment ~ '"') if item.comment is defined else '' }}
+    {{ (' -email ' ~ item.email) if item.email is defined else '' }}
+    {{ (' -enable ' ~ item.enable) if item.enable is defined else '' }}
+    {{ (' -expire ' ~ item.expire) if item.expire is defined else '' }}
+    {{ (' -firstname "' ~ item.firstname ~ '"') if item.firstname is defined else '' }}
+    {{ (' -groups "' ~ item.groups ~ '"') if item.groups is defined else '' }}
+    {{ (' -keys "' ~ item.key ~ '"') if item.key is defined else '' }}
+    {{ (' -lastname "' ~ item.lastname ~ '"') if item.lastname is defined else '' }}
+    {{ (' -password "' ~ item.password ~ '"') if item.password is defined and 'user:' ~ item.name not in __proxmoxy_users.stdout else '' }}
+  with_items: "{{ proxmoxy_permission_users }}"
+  when: >
+    item and not __proxmoxy_users.stdout |
+    search( "user:{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:".format(
+    item.name|default(omit), item.enable|int|default(1),
+    item.expire|int|default(0), item.firstname|default('[^:]*'), item.lastname|default('[^:]*'),
+    item.email|default('[^:]*'), item.comment|default('[^:]*'), item.key|default('[^:]*')
+    ) )
+
+- name: Permission > create/modify roles
+  shell: >
+    pveum {{ 'rolemod' if 'role:' ~ item.name in __proxmoxy_users.stdout else 'roleadd'  }} {{ item.name }}
+    {{ (' -privs "' ~ item.privs|sort|join(',') ~ '"') if item.privs is defined else '' }}
+  with_items: "{{ proxmoxy_permission_roles }}"
+  when: >
+    item and not __proxmoxy_users.stdout |
+    search( "role:{0}:{1}:".format(
+    item.name|default(omit), item.privs|sort|join(',')|default('[^:]*') ))
+
+# Limitations: Doesn't seem to set users, only groups. Groups are always appended and not deleted. The aclmod mode does not work like above modes and replace values.
+- name: Permission > create/modify acls
+  shell: >
+    pveum aclmod {{ item.path }} -roles "{{ item.roles|sort|join(',') }}"
+    {{ (' -groups "' ~ item.groups|sort|join(',') ~ '"') if item.groups is defined else '' }}
+    {{ (' -propagate "' ~ item.propagate ~ '"') if item.propagate is defined else '' }}
+    {{ (' -users "' ~ item.users|sort|join(',') ~ '"') if item.users is defined else '' }}
+  with_items: "{{ proxmoxy_permission_acls }}"
+  when: >
+    item and not __proxmoxy_users.stdout |
+    search( "acl:{0}:{1}:{2}:{3}:".format(
+    item.propagate|default(1), item.path|default('/'),
+    '@?' ~ (item.groups|default([]) + item.users|default([]))|sort|join(',@?')|default('[^:]*'),
+    item.roles|sort|join(',')|default('[^:]*') ))
+
+# cat /etc/pve/user.cfg
+# role:Sys_Power:Sys.PowerMgmt,Sys.Console:
+# acl:1:/:@admins:PVEAuditor,PVEDatastoreUser,PVEVMAdmin,Sys_Power:
