@@ -1,4 +1,9 @@
 ---
+# Host system
+- include: host.yml
+  tags:
+    - proxmoxy
+    - dev
 
 # Templates
 - include: templates.yml
