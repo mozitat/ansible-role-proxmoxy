@@ -1,0 +1,20 @@
+galaxy_info:
+  author: mozit.eu
+  description: >
+    Configure proxmox hosts (min 4.x) and lxc containers without dependencies.
+     This role requires proxmox 4.x to be already installed.
+  company: mozit.eu
+  license: MIT
+  min_ansible_version: 2.0
+  platforms:
+  - name: Debian
+    versions:
+    - wheezy
+    - jessie
+
+  galaxy_tags:
+    - proxmox
+    - system
+    - debian
+
+dependencies: []
