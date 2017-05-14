@@ -1,6 +1,6 @@
 ---
 
-# Templates
+## Templates
 proxmoxy_templates_storage: "local"
 proxmoxy_templates_dir: "/var/lib/vz/template/cache"  # or local:vztmpl
 # can use regex pattern
@@ -8,16 +8,39 @@ proxmoxy_templates_default: "centos-7"
 # Should pveam update be called always?
 proxmoxy_templates_update: False
 # pveam download templates, can use regex, i.e. ['centos-7-default', 'debian-8..-standard']
-# cave: the list contains turnkey templates as  well
+# cave: the list contains turnkey templates as well, print with pveam available.
 proxmoxy_templates: []
 
-# Permissions, Users
-proxmoxy_permission_groups: {}
-proxmoxy_permission_users: {}
+## Permissions, Users, examples in comment below
+# Values of all except acls will be replaced. Acl values will be appended to its current value.
+proxmoxy_permission_groups: [{}]
+# - { name: admins, comment: 'Admins Group' }
+proxmoxy_permission_users: [{}]  # uid user@pam must exist on linux host.
+#  - { name: user@pam, comment: 'its a user', email: 'user@bla.at', enable: True,
+#      expire: 0, firstname: 'Max', groups: 'admins', key: '', lastname: 'Mus,
+#      password: Null }
+proxmoxy_permission_roles: [{}]  # privs is a list
+#  - { name: Sys_Power, privs: ['Sys.PowerMgmt', 'Sys.Console'] }
+proxmoxy_permission_acls: [{}]
+# - { path: '/', roles: ['PVEVMAdmin', 'Sys_Power'],
+#     propagate: 1, groups: ['admins', group1'] }
 
+## Proxmox storage
+proxmoxy_storage: [{}]
+proxmoxy_storage_content: ['images', 'rootdir']
+proxmoxy_storage_nodes: []
+proxmoxy_storage_changes: False  # Always set options
+proxmoxy_storage_remove: []  # storages to remove. Place here to recreate anew.
+# proxmoxy_storage examples for type: zfspool|dir|nfs, mandatory props cannot be changed after creation
+# - { type: zfspool, id: tank-zfs, pool: tank/data, # mandatory
+#   blocksize: Null, sparse: 1,  # zfs props
+#   content: ['images', 'rootdir'], disable: 0, nodes: ['sv01'] } # common to all
+#
+# - { type: dir, id: tank_home-dir, path: /tank/home,  # mandatory
+#   maxfiles: 3,  shared: 0 }
+# - { type: nfs, id: backup-nfs,  # mandatory
+#   server: 10.0.0.9, export: /backup, path: /mnt/nfs_backup,  # mandatory
+#   options: 'vers=3,soft', maxfiles: 7, }
 
-# Proxmox storage
-# tbd
-
-# Provision lxc containers
+## Provision lxc containers
 proxmoxy_containers: []

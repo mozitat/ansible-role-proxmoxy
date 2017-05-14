@@ -19,4 +19,4 @@
   shell: >
     pveam download {{ proxmoxy_templates_storage|default('local') }} {{ item }}
     creates={{ proxmoxy_templates_dir }}/{{ item }}
-  with_items: "{{ __proxmoxy_templates_list }}"
+  with_items: "{{ __proxmoxy_templates_list | default([]) }}"
