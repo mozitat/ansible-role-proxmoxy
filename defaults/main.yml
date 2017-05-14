@@ -52,4 +52,6 @@ proxmoxy_storage_remove: []  # storages to remove. Place here to recreate anew.
 #   options: 'vers=3,soft', maxfiles: 7, }
 
 ## Provision lxc containers
-proxmoxy_containers: []
+proxmoxy_provision_containers: []  # list of container configs
+proxmoxy_provision_post_cmds: []  # run these commands in container after create
+#  - yum -y install openssh-server

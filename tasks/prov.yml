@@ -1,20 +1,25 @@
 ---
 
-# TODO TBD if this should be moved to templates task
-- name: templates > find files
+- name: provision > find all template files
   command: "find -type f -printf '%P\n'"
   args:
     chdir: "{{ proxmoxy_templates_dir }}"
   changed_when: false
-  register: __proxmoxy_templates_find_result
+  register: __proxmoxy_prov_reg_templates
+
+- name: provision > get list of current VMIDs
+  shell: >
+    pct list | cut -f1 -d' ' | grep -iv VMID || echo 'empty'
+  changed_when: false
+  register: __proxmoxy_prov_reg_vmids
 
 # Compute the right ostemplate file for every container.
 # ostemplate can contain a (regex) pattern to match the filename, i.e. "centos-7.*20160404.*"
 # complicated statement, therefor outsourced to its own set_fact var
 - name: provision > populate matching templates for all containers
   set_fact:
-    __proxmoxy_ct_template_match: "{{ __proxmoxy_ct_template_match|default({}) | combine( {item.vmid: __proxmoxy_templates_find_result.stdout_lines|select('search', item.ostemplate|default(proxmoxy_templates_default))|sort|last|string} ) }}"
-  with_items: "{{ proxmoxy_containers }}"
+    __proxmoxy_ct_template_match: "{{ __proxmoxy_ct_template_match|default({}) | combine( {item.vmid: __proxmoxy_prov_reg_templates.stdout_lines|select('search', item.ostemplate|default(proxmoxy_templates_default))|sort|last|string} ) }}"
+  with_items: "{{ proxmoxy_provision_containers }}"
 
 - name: provision > configure lxc container
   proxmox_prov:
@@ -63,5 +68,34 @@
     swap: "{{ item.swap|default(omit) }}"
     tty: "{{ item.tty|default(omit) }}"
     unprivileged: "{{ item.unprivileged|default(omit) }}"
+  with_items: "{{ proxmoxy_provision_containers }}"
+  register: __proxmoxy_register_containers
 
-  with_items: "{{ proxmoxy_containers }}"
+# If vm (vmid) was not here before (on top), it must be a new VM.
+- debug:
+    var: item.item.vmid
+    verbosity: 1
+  when: item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines
+  with_items: "{{ __proxmoxy_register_containers.results }}"
+
+- name: Provision > start new containers
+  shell: >
+    pct start {{ item.item.vmid | d() }}
+  when: item and item.item.vmid | string not in __proxmoxy_prov_reg_vmids.stdout_lines
+  with_items:
+    - "{{ __proxmoxy_register_containers.results|d([]) }}"
+
+- name: Provision > execute commands on new containers
+  shell: >
+    echo {{ item[1] }} | pct enter {{ item[0].item.vmid|d() }}
+  when: item[0] and item[0].item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines
+  with_nested:
+    - "{{ __proxmoxy_register_containers.results|d([]) }}"
+    - "{{ proxmoxy_provision_post_cmds|d([]) }}"
+
+- name: Provision > stop new containers, unless onboot
+  shell: >
+    pct stop {{ item.item.vmid|d() }}
+  when: item and (item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines) and not item.item.onboot|d(False)
+  with_items:
+    - "{{ __proxmoxy_register_containers.results|d([]) }}"
