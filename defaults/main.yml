@@ -37,8 +37,9 @@ proxmoxy_permission_acls: [{}]
 proxmoxy_storage: [{}]
 proxmoxy_storage_content: ['images', 'rootdir']
 proxmoxy_storage_nodes: []
-proxmoxy_storage_changes: False  # Always set options
+proxmoxy_storage_changes: True  # Always set options, or don't
 proxmoxy_storage_remove: []  # storages to remove. Place here to recreate anew.
+
 # proxmoxy_storage examples for type: zfspool|dir|nfs, mandatory props cannot be changed after creation
 # - { type: zfspool, id: tank-zfs, pool: tank/data, # mandatory
 #   blocksize: Null, sparse: 1,  # zfs props
