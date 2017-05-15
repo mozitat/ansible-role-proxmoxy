@@ -45,7 +45,8 @@
     mp7: "{{ item.mp7|default(omit) }}"
     mp8: "{{ item.mp8|default(omit) }}"
     mp9: "{{ item.mp9|default(omit) }}"
-    net0: "{{ item.net0|default(omit) }}"
+    net0: "{{ item.net0 | combine({'bridge': proxmoxy_provision_bridge|d('vmbr0')}) if item.net0 and item.net0.bridge is undefined else  item.net0|default(omit) }}"
+    # net0: "{{ item.net0|default(omit) }}"
     net1: "{{ item.net1|default(omit) }}"
     net2: "{{ item.net2|default(omit) }}"
     net3: "{{ item.net3|default(omit) }}"
@@ -71,17 +72,17 @@
   with_items: "{{ proxmoxy_provision_containers }}"
   register: __proxmoxy_register_containers
 
-# If vm (vmid) was not here before (on top), it must be a new VM.
-- debug:
-    var: item.item.vmid
-    verbosity: 1
-  when: item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines
-  with_items: "{{ __proxmoxy_register_containers.results }}"
+# - debug:
+#     var: item.item.vmid
+#     verbosity: 1
+#   when: item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines
+#   with_items: "{{ __proxmoxy_register_containers.results }}"
 
+# If vm (vmid) was not here before (on top), it must be a new VM.
 - name: Provision > start new containers
   shell: >
     pct start {{ item.item.vmid | d() }}
-  when: item and item.item.vmid | string not in __proxmoxy_prov_reg_vmids.stdout_lines
+  when: item and item.item.vmid | string not in __proxmoxy_prov_reg_vmids.stdout_lines and (proxmoxy_provision_post_cmds|length or item.item.onboot|d(False)|bool)
   with_items:
     - "{{ __proxmoxy_register_containers.results|d([]) }}"
 
@@ -97,6 +98,6 @@
 - name: Provision > stop new containers, unless onboot
   shell: >
     pct stop {{ item.item.vmid|d() }}
-  when: item and (item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines) and not item.item.onboot|d(False)|bool
+  when: item and (item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines) and not item.item.onboot|d(False)|bool and proxmoxy_provision_post_cmds|length
   with_items:
     - "{{ __proxmoxy_register_containers.results|d([]) }}"

@@ -83,6 +83,7 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
 | Name                                  | Default                    | Type    | Description                    |
 | ------------------------------------- | -------------------------- | ------- | ------------------------------ |
 | `proxmoxy_provision_secret`           | `true`                     | Boolean | Read/save credentials from secret folder, [debops.secret](https://github.com/debops/ansible-secret) compatible |
+| `proxmoxy_provision_bridge`           | `"vmbr0"`                  | string  | Default bridge definition for netX networks |
 | `proxmoxy_provision_containers`       | `[]`                       | list    | List of container configurations |
 | `proxmoxy_provision_post_cmds`        | `[]`                       | list    | List of commands to run in new containers, may use double quotes. (but MUST not use single quotes) |
 

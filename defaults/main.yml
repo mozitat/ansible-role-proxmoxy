@@ -53,6 +53,7 @@ proxmoxy_storage_remove: []  # storages to remove. Place here to recreate anew.
 
 ## Provision lxc containers
 proxmoxy_provision_secret: True  # read/save password 
+proxmoxy_provision_bridge: 'vmbr0'
 proxmoxy_provision_containers: []  # list of container configs
 # minimal cfg with network
 # - vmid: 101
