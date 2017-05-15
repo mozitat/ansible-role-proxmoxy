@@ -93,6 +93,9 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
 ```yaml
 - hosts: all
   vars:
+    proxmoxy_host_modules:
+      lm-sensors: w83627ehf
+
     proxmoxy_templates:
     - 'centos-[67]{1}-.*'
     - 'debian-8..-standard'

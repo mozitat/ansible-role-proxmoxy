@@ -1,8 +1,7 @@
 ---
 
 ## Host system
-proxmoxy_host_modules: {}  # load kernel modules at boot.
-# { lm-sensors: w83627ehf }
+proxmoxy_host_modules: {}
 proxmoxy_host_tuntap: True  # enable tun/tap for lxc CTs.
 proxmoxy_host_remove_nosubnag: True  # remove no subscription login message.
 proxmoxy_host_repo_enterprise: False  # remove enterprise apt repo if false
@@ -10,28 +9,19 @@ proxmoxy_host_repo_nosubs: True  # enable no-subscription repo
 
 ## Templates
 proxmoxy_templates_storage: "local"
-proxmoxy_templates_dir: "/var/lib/vz/template/cache"  # or local:vztmpl
+proxmoxy_templates_dir: "/var/lib/vz/template/cache"
 # can use regex pattern
 proxmoxy_templates_default: "centos-7"
 # Should pveam update be called always?
 proxmoxy_templates_update: False
-# pveam download templates, can use regex, i.e. ['centos-7-default', 'debian-8..-standard']
-# cave: the list contains turnkey templates as well, print with pveam available.
+# pveam download templates
 proxmoxy_templates: []
 
-## Permissions, Users, examples in comment below
-# Values of all except acls will be replaced. Acl values will be appended to its current value.
+## Permissions, Users, ...
 proxmoxy_permission_groups: [{}]
-# - { name: admins, comment: 'Admins Group' }
 proxmoxy_permission_users: [{}]  # uid user@pam must exist on linux host.
-#  - { name: user@pam, comment: 'its a user', email: 'user@bla.at', enable: True,
-#      expire: 0, firstname: 'Max', groups: 'admins', key: '', lastname: 'Mus,
-#      password: Null }
-proxmoxy_permission_roles: [{}]  # privs is a list
-#  - { name: Sys_Power, privs: ['Sys.PowerMgmt', 'Sys.Console'] }
+proxmoxy_permission_roles: [{}]
 proxmoxy_permission_acls: [{}]
-# - { path: '/', roles: ['PVEVMAdmin', 'Sys_Power'],
-#     propagate: 1, groups: ['admins', group1'] }
 
 ## Proxmox storage
 proxmoxy_storage: [{}]
@@ -40,31 +30,8 @@ proxmoxy_storage_nodes: []
 proxmoxy_storage_changes: True  # Always set options, or don't
 proxmoxy_storage_remove: []  # storages to remove. Place here to recreate anew.
 
-# proxmoxy_storage examples for type: zfspool|dir|nfs, mandatory props cannot be changed after creation
-# - { type: zfspool, id: tank-zfs, pool: tank/data, # mandatory
-#   blocksize: Null, sparse: 1,  # zfs props
-#   content: ['images', 'rootdir'], disable: 0, nodes: ['sv01'] } # common to all
-#
-# - { type: dir, id: tank_home-dir, path: /tank/home,  # mandatory
-#   maxfiles: 3,  shared: 0 }
-# - { type: nfs, id: backup-nfs,  # mandatory
-#   server: 10.0.0.9, export: /backup, path: /mnt/nfs_backup,  # mandatory
-#   options: 'vers=3,soft', maxfiles: 7, }
-
 ## Provision lxc containers
 proxmoxy_provision_secret: True  # read/save password 
 proxmoxy_provision_bridge: 'vmbr0'
 proxmoxy_provision_containers: []  # list of container configs
-# minimal cfg with network
-# - vmid: 101
-#   state: present
-#   ostemplate: "centos-7.*"
-#   storage: local-zfs
-#   hostname: lxc101
-#   net0:
-#     name: eth0
-#     bridge: vmbr0  # mandatory
-#     ip: 10.0.0.11/24
-#     gw: 10.0.0.1
-proxmoxy_provision_post_cmds: []  # run commands in new containers, you may use double quotes. (but MUST not use single quotes)
-#  - yum -y install openssh-server; systemctl start sshd
+proxmoxy_provision_post_cmds: []  # run commands in new containers
