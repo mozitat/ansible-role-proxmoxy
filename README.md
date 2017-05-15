@@ -150,8 +150,8 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
         path: /tank/somedir
         maxfiles: 3
         shared: 0
-      - type: nfs
-        id: storage-nfs  # mandatory 'type id server export path'
+      - type: nfs  # mandatory 'type id server export path'
+        id: storage-nfs
         server: 192.168.1.2
         export: /myexport
         path: /mnt/nfs_myexport
