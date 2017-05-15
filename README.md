@@ -31,50 +31,63 @@ ansible-galaxy install mozitat.proxmoxy
 
 ## Role Variables
 
-All variables are defined in `defaults/main.yml`.
+All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the Examples section for possible values.
 
 ### Host
 
-| Name                                  | Default                    | Type    | Description                    |
-| ------------------------------------- | -------------------------- | ------- | ------------------------------ |
-| `proxmoxy_host_modules`               | {}                         | dict    | load kernel modules on boot    |
-| `proxmoxy_host_tuntap`                | true                       | Boolean | enable tun/tap for lxc ct      |
-| `proxmoxy_host_remove_nosubnag`       | true                       | Boolean | remove no-subscription message |
-| `proxmoxy_host_repo_enterprise`       | false                      | Boolean | dis-/enable enterprise repo    |
-| `proxmoxy_host_repo_nosubs`           | true                       | Boolean | enable no-subscription repo    |
+| Name                                  | Default                    | Type    | Description                             |
+| ------------------------------------- | -------------------------- | ------- | --------------------------------------- |
+| `proxmoxy_host_modules`               | `{}`                         | dict    | Load extra kernel modules on boot       |
+| `proxmoxy_host_tuntap`                | `true`                       | Boolean | Enable tun/tap for lxc ct               |
+| `proxmoxy_host_remove_nosubnag`       | `true`                       | Boolean | Remove no-subscription message on login |
+| `proxmoxy_host_repo_enterprise`       | `false`                      | Boolean | Disable/enable enterprise repo          |
+| `proxmoxy_host_repo_nosubs`           | `true`                       | Boolean | Enable no-subscription repo             |
 
 ### Templates
 
-| Name                                  | Default                     | Type    | Description                    |
-| ------------------------------------- | --------------------------  | ------- | ------------------------------ |
-| `proxmoxy_templates_storage`          | "local"                     | string  | which storage to use           |
-| `proxmoxy_templates_dir`              | "/var/lib/vz/template/cache"| string  | template directory             |
-| `proxmoxy_templates_default`          | "centos-7"                  | string  | default template used in provisioning |
-| `proxmoxy_templates_update`           |  false                      | Boolean | always update template list?   |
-| `proxmoxy_templates`                  | []                          | list    | download these templates, python regex possible |
+| Name                                  | Default                        | Type    | Description                                                 |
+| ------------------------------------- | ------------------------------ | ------- | ----------------------------------------------------------- |
+| `proxmoxy_templates_storage`          | `"local"`                      | string  | Which storage to use for template storage                   |
+| `proxmoxy_templates_dir`              | `"/var/lib/vz/template/cache"` | string  | The template files directory                                |
+| `proxmoxy_templates_default`          | `"centos-7"`                   | string  | Default template used in provisioning                       |
+| `proxmoxy_templates_update`           | `false`                        | Boolean | Always update template list with `pveam update`?            |
+| `proxmoxy_templates`                  | `[]`                           | list    | Download these templates, can use python regex expressions. |
 
 ### Permission
 
+*This module uses the pveum utility. `man pveum`*
+
 | Name                                  | Default                     | Type          | Description                    |
 | ------------------------------------- | --------------------------  | ------------- | ------------------------------ |
-| `proxmoxy_permission_groups`          | [{}]                        | list of dicts |            |
-| `proxmoxy_permission_users`           | [{}]                        | list of dicts |            |
-| `proxmoxy_permission_roles`           | [{}]                        | list of dicts |            |
-| `proxmoxy_permission_acls`            | [{}]                        | list of dicts |            |
+| `proxmoxy_permission_groups`          | `[{}]`                      | list of dicts | Create these groups            |
+| `proxmoxy_permission_users`           | `[{}]`                      | list of dicts | Create users, the uid "user@pam" has to exist on the host |
+| `proxmoxy_permission_roles`           | `[{}]`                      | list of dicts | Create roles           |
+| `proxmoxy_permission_acls`            | `[{}]`                      | list of dicts | ACL values will be appended to the current value |
 
 ### Storage
 
+*Currently cannot detect changes in single storage items, you can choose between set only on creation or always set.*
+
 | Name                                  | Default                     | Type          | Description                    |
 | ------------------------------------- | --------------------------  | ------------- | ------------------------------ |
-| `proxmoxy_storage`                    | [{}]                        | list of dicts |            |
-| `proxmoxy_storage_content`            | ['images', 'rootdir']       | list          |            |
-| `proxmoxy_storage_nodes`              | []                          | list          |            |
-| `proxmoxy_storage_changes`            | True                        | Boolean       |            |
-| `proxmoxy_storage_remove`             | []                          | list          |            |
+| `proxmoxy_storage`                    | `[{}]`                      | list of dicts | PVE storages to create         |
+| `proxmoxy_storage_content`            | `['images', 'rootdir']`     | list          | Default storage content        |
+| `proxmoxy_storage_nodes`              | `[]`                        | list          | Default list of nodes for storages, leave empty for all. |
+| `proxmoxy_storage_changes`            | `true`                      | Boolean       | Always set storage settings.   |
+| `proxmoxy_storage_remove`             | `[]`                        | list          | List of storage items to remove. Items in this list normally should not appear in `proxmoxy_storage` |
+
+### Provision
+
+| Name                                  | Default                    | Type    | Description                    |
+| ------------------------------------- | -------------------------- | ------- | ------------------------------ |
+| `proxmoxy_provision_secret`           | `true`                     | Boolean | Read/save credentials from secret folder, [debops.secret](https://github.com/debops/ansible-secret) compatible |
+| `proxmoxy_provision_containers`       | `[]`                       | list    | List of container configurations |
+| `proxmoxy_provision_post_cmds`        | `[]`                       | list    | List of commands to run in new containers, may use double quotes. (but MUST not use single quotes) |
+
 
 ## Example Playbook
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+TODO Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
     - hosts: servers
       roles:
