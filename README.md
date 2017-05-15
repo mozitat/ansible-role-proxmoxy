@@ -2,13 +2,13 @@
 
 Configures proxmox 4.x hosts and provisions lxc vm containers. It does this by directly interfacing with the proxmox shell tools on the proxmox host. There is no direct dependency on the proxmox http API or libraries like proxmoxer.
 
-For container management it ships with the proxmox_prov Ansible module. 
+For container management it ships with the [proxmox_prov](library/proxmoxy_prov.py) Ansible module. 
 
-Proxmoxy can do:
+Proxmoxy is able to:
 * Host: configure Proxmox host system
 * Templates: LXC Template management/downloading
 * Permission: set Proxmox Users/Groups, Permissions and ACL
-* Storage: management of storages (currently of type dir|zfspool|nfs)
+* Storage: management of storages *(type dir|zfspool|nfs)*
 * Provision: Create and configure LXC Containers with the proxmox_prov Module
 
 ## Requirements
@@ -44,6 +44,8 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
 | `proxmoxy_host_repo_nosubs`           | `true`                       | Boolean | Enable no-subscription repo             |
 
 ### Templates
+
+*For a list of all templates: `pveam available`*
 
 | Name                                  | Default                        | Type    | Description                                                 |
 | ------------------------------------- | ------------------------------ | ------- | ----------------------------------------------------------- |
@@ -87,11 +89,94 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
 
 ## Example Playbook
 
-TODO Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+```yaml
+- hosts: all
+  vars:
+    proxmoxy_templates:
+    - 'centos-[67]{1}-.*'
+    - 'debian-8..-standard'
+    - 'ubuntu-16.[0-9]+-standard']
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+    proxmoxy_permission_groups:
+      - name: admins
+        comment: 'Admins Group'
+      - name: group1
+        comment: 'another group'
+
+    proxmoxy_permission_users:
+      - name: myuser@pam
+        comment: 'Dis my user'
+        email: 'myuser@bla.at'
+        enable: True,
+        expire: 0
+        firstname: 'Max'
+        groups: 'admins,group1'
+        key: ''
+        lastname: 'Muster'
+        password: Null
+
+    proxmoxy_permission_roles:
+      - name: Sys_Power
+        privs:
+          - 'Sys.PowerMgmt'
+          - 'Sys.Console'
+
+    proxmoxy_permission_acls:
+      - path: '/'
+        roles:
+          - 'PVEAuditor'
+          - 'PVEDatastoreUser'
+          - 'PVEVMAdmin'
+          - 'Sys_Power'
+        propagate: 1
+        groups:
+          - 'group1'
+
+    proxmoxy_storage:
+      - type: zfspool  # mandatory 'type, id, pool'
+        id: storage-zfs
+        pool: tank/data
+        blocksize: Null
+        sparse: 1
+        content: ['images', 'rootdir']
+        disable: 0
+        nodes: ['mynode1']
+      - type: dir  # mandatory 'type id path'
+        id: storage-dir
+        path: /tank/somedir
+        maxfiles: 3
+        shared: 0
+      - type: nfs
+        id: storage-nfs  # mandatory 'type id server export path'
+        server: 192.168.1.2
+        export: /myexport
+        path: /mnt/nfs_myexport
+        options: 'vers=3,soft'
+        maxfiles: 7
+        content: ['images', 'rootdir', 'vztmpl', 'backup', 'iso']
+
+    proxmoxy_storage_remove:
+    - 'tank-remove'
+    - 'andremoveme'
+
+    proxmoxy_provision_containers:
+      - vmid: 210
+        state: present
+        ostemplate: "centos-7.*"
+        password: abc1234  # ignored if secret is used
+        storage: local-zfs
+        hostname: ct210
+        memory: 512
+        onboot: True
+        net0:
+          name: eth0
+          bridge: vmbr0
+          ip: 192.168.1.210/24
+          gw: 192.168.1.1
+
+  roles:
+    - role: mozitat.proxmoxy
+```
 
 ## License
 
