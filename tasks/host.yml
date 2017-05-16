@@ -6,13 +6,13 @@
 - name: Host > disable/enable proxmox enterprise repo
   apt_repository:
     repo: deb https://enterprise.proxmox.com/debian jessie pve-enterprise
-    state: "{{ 'present' if proxmoxy_host_repo_enterprise else 'absent' }}"
+    state: "{{ 'present' if proxmoxy__host_repo_enterprise else 'absent' }}"
     filename: pve-enterprise
 
 - name: enable/disable proxmox no-subscription repo
   apt_repository:
     repo: deb http://download.proxmox.com/debian jessie pve-no-subscription
-    state: "{{ 'present' if proxmoxy_host_repo_nosubs else 'absent' }}"
+    state: "{{ 'present' if proxmoxy__host_repo_nosubs else 'absent' }}"
     filename: pve-no-subscription
 
 
@@ -26,12 +26,12 @@
     line: "{{ item.value }}"
     state: present
     create: yes
-  with_dict: "{{ proxmoxy_host_modules }}"
+  with_dict: "{{ proxmoxy__host_modules }}"
 
 - name: Host > modprobe kernel modules now
   modprobe:
     name: "{{ item.value }}"
-  with_dict: "{{ proxmoxy_host_modules }}"
+  with_dict: "{{ proxmoxy__host_modules }}"
 
 - name: Host > remove proxmox ui no-subscription warning message
   lineinfile:
@@ -39,7 +39,7 @@
     regexp: "(\\s*if \\(data.status !== 'Active')(\\) {)"
     line: '\1 && false\2'
     backrefs: yes
-  when: proxmoxy_host_remove_nosubnag
+  when: proxmoxy__host_remove_nosubnag
 
 # tbd lxc.mount.entry = /dev/net dev/net none bind,create=dir
 - name: Host > enable tun/tap device in lxc
@@ -49,4 +49,4 @@
     line: "lxc.cgroup.devices.allow = c 10:200 rwm"
     create: yes
     state: present
-  when: proxmoxy_host_tuntap
+  when: proxmoxy__host_tuntap

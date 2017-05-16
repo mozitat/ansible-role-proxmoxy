@@ -13,7 +13,7 @@
 - name: Storage > remove storages
   shell: >
     pvesm remove {{ item }}
-  with_items: "{{ proxmoxy_storage_remove }}"
+  with_items: "{{ proxmoxy__storage_remove }}"
   # not sure if \n in string from above is evaluated
   when: >
     item and __proxmoxy_storage_status.stdout | search( '[\nn]' ~ item ~ '\s+')
@@ -39,10 +39,10 @@
     {{ ' -shared "' ~ item.shared|int ~ '"' if item.shared is defined else '' }}
     {#- common -#}
     {{ ' -maxfiles "' ~ item.maxfiles ~ '"' if item.maxfiles|d(None) else '' }}
-    {{ ' -nodes "' ~ item.nodes|d(proxmoxy_storage_nodes)|sort|join(',') ~ '"' if item.nodes|d(proxmoxy_storage_nodes) else '' }}
-    {{ ' -content "' ~ item.content|d(proxmoxy_storage_content)|sort|join(',') ~ '"' }}
+    {{ ' -nodes "' ~ item.nodes|d(proxmoxy__storage_nodes)|sort|join(',') ~ '"' if item.nodes|d(proxmoxy__storage_nodes) else '' }}
+    {{ ' -content "' ~ item.content|d(proxmoxy__storage_content)|sort|join(',') ~ '"' }}
     {{ ' -disable "' ~ item.disable|d(0) ~ '"' }}
-  with_items: "{{ proxmoxy_storage }}"
+  with_items: "{{ proxmoxy__storage }}"
   when: >
     item and not __proxmoxy_storage_status.stdout |
     search( "{0}\s+{1}\s".format(item.id|default(omit), item.type|default(omit)))
@@ -51,7 +51,7 @@
   # failed_when: "__result.rc != 0 and 'already defined' not in __result.stderr"
   # changed_when: "__result.rc == 0"
 
-- name: Storage > set storage options if {{ proxmoxy_storage_changes }}
+- name: Storage > set storage options if {{ proxmoxy__storage_changes }}
   shell: >
     pvesm set {{ item.id }}
     {#- nfs -#}
@@ -63,12 +63,12 @@
     {{ ' -shared "' ~ item.shared|int ~ '"' if item.shared is defined else '' }}
     {#- common -#}
     {{ ' -maxfiles "' ~ item.maxfiles ~ '"' if item.maxfiles|d(None) else '' }}
-    {{ ' -nodes "' ~ item.nodes|d(proxmoxy_storage_nodes)|sort|join(',') ~ '"' if item.nodes|d(proxmoxy_storage_nodes) else '' }}
-    {{ ' -content "' ~ item.content|d(proxmoxy_storage_content)|sort|join(',') ~ '"' }}
+    {{ ' -nodes "' ~ item.nodes|d(proxmoxy__storage_nodes)|sort|join(',') ~ '"' if item.nodes|d(proxmoxy__storage_nodes) else '' }}
+    {{ ' -content "' ~ item.content|d(proxmoxy__storage_content)|sort|join(',') ~ '"' }}
     {{ ' -disable "' ~ item.disable|d(0) ~ '"' }}
-  with_items: "{{ proxmoxy_storage }}"
+  with_items: "{{ proxmoxy__storage }}"
   when: >
-    item and proxmoxy_storage_changes and 
+    item and proxmoxy__storage_changes and 
     __proxmoxy_storage_status.stdout | search( item.id ~ '\s+' ~ item.type )
 
 

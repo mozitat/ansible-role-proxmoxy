@@ -3,7 +3,7 @@
 - name: provision > find all template files
   command: "find -type f -printf '%P\n'"
   args:
-    chdir: "{{ proxmoxy_templates_dir }}"
+    chdir: "{{ proxmoxy__templates_dir }}"
   changed_when: false
   register: __proxmoxy_prov_reg_templates
 
@@ -18,16 +18,16 @@
 # complicated statement, therefor outsourced to its own set_fact var
 - name: provision > populate matching templates for all containers
   set_fact:
-    __proxmoxy_ct_template_match: "{{ __proxmoxy_ct_template_match|default({}) | combine( {item.vmid: __proxmoxy_prov_reg_templates.stdout_lines|select('search', item.ostemplate|default(proxmoxy_templates_default))|sort|last|string} ) }}"
-  with_items: "{{ proxmoxy_provision_containers }}"
+    __proxmoxy_ct_template_match: "{{ __proxmoxy_ct_template_match|default({}) | combine( {item.vmid: __proxmoxy_prov_reg_templates.stdout_lines|select('search', item.ostemplate|default(proxmoxy__templates_default))|sort|last|string} ) }}"
+  with_items: "{{ proxmoxy__provision_containers }}"
 
 - name: provision > configure lxc container
   proxmox_prov:
     state: "{{ item.state|default('present') }}"
     vmid: "{{ item.vmid }}"
-    password: "{{ lookup('password', secret|d('secret') + '/cred/' + ansible_fqdn + '/root/pw length=20') if proxmoxy_provision_secret else item.password|default(omit) }}"
+    password: "{{ lookup('password', secret|d('secret') + '/cred/' + ansible_fqdn + '/root/pw length=20') if proxmoxy__provision_secret else item.password|default(omit) }}"
     hostname: "{{ item.hostname|default('newlxc') }}"
-    ostemplate: "{{ proxmoxy_templates_dir }}/{{ __proxmoxy_ct_template_match[item.vmid]|default(omit) }}"
+    ostemplate: "{{ proxmoxy__templates_dir }}/{{ __proxmoxy_ct_template_match[item.vmid]|default(omit) }}"
     arch: "{{ item.arch|default(omit) }}"
     cmode: "{{ item.cmode|default(omit) }}"
     console: "{{ item.console|default(omit) }}"
@@ -45,16 +45,16 @@
     mp7: "{{ item.mp7|default(omit) }}"
     mp8: "{{ item.mp8|default(omit) }}"
     mp9: "{{ item.mp9|default(omit) }}"
-    net0: "{{ item.net0 | combine({'bridge': proxmoxy_provision_bridge|d('vmbr0')}) if item.net0 and item.net0.bridge is undefined else  item.net0|default(omit) }}"
-    net1: "{{ item.net1 | combine({'bridge': proxmoxy_provision_bridge|d('vmbr0')}) if item.net1 and item.net1.bridge is undefined else  item.net1|default(omit) }}"
-    net2: "{{ item.net2 | combine({'bridge': proxmoxy_provision_bridge|d('vmbr0')}) if item.net2 and item.net2.bridge is undefined else  item.net2|default(omit) }}"
-    net3: "{{ item.net3 | combine({'bridge': proxmoxy_provision_bridge|d('vmbr0')}) if item.net3 and item.net3.bridge is undefined else  item.net3|default(omit) }}"
-    net4: "{{ item.net4 | combine({'bridge': proxmoxy_provision_bridge|d('vmbr0')}) if item.net4 and item.net4.bridge is undefined else  item.net4|default(omit) }}"
-    net5: "{{ item.net5 | combine({'bridge': proxmoxy_provision_bridge|d('vmbr0')}) if item.net5 and item.net5.bridge is undefined else  item.net5|default(omit) }}"
-    net6: "{{ item.net6 | combine({'bridge': proxmoxy_provision_bridge|d('vmbr0')}) if item.net6 and item.net6.bridge is undefined else  item.net6|default(omit) }}"
-    net7: "{{ item.net7 | combine({'bridge': proxmoxy_provision_bridge|d('vmbr0')}) if item.net7 and item.net7.bridge is undefined else  item.net7|default(omit) }}"
-    net8: "{{ item.net8 | combine({'bridge': proxmoxy_provision_bridge|d('vmbr0')}) if item.net8 and item.net8.bridge is undefined else  item.net8|default(omit) }}"
-    net9: "{{ item.net9 | combine({'bridge': proxmoxy_provision_bridge|d('vmbr0')}) if item.net9 and item.net9.bridge is undefined else  item.net9|default(omit) }}"
+    net0: "{{ item.net0 | combine({'bridge': proxmoxy__provision_bridge|d('vmbr0')}) if item.net0|d({}) and item.net0.bridge is undefined else item.net0|default(omit) }}"
+    net1: "{{ item.net1 | combine({'bridge': proxmoxy__provision_bridge|d('vmbr0')}) if item.net1|d({}) and item.net1.bridge is undefined else item.net1|default(omit) }}"
+    net2: "{{ item.net2 | combine({'bridge': proxmoxy__provision_bridge|d('vmbr0')}) if item.net2|d({}) and item.net2.bridge is undefined else item.net2|default(omit) }}"
+    net3: "{{ item.net3 | combine({'bridge': proxmoxy__provision_bridge|d('vmbr0')}) if item.net3|d({}) and item.net3.bridge is undefined else item.net3|default(omit) }}"
+    net4: "{{ item.net4 | combine({'bridge': proxmoxy__provision_bridge|d('vmbr0')}) if item.net4|d({}) and item.net4.bridge is undefined else item.net4|default(omit) }}"
+    net5: "{{ item.net5 | combine({'bridge': proxmoxy__provision_bridge|d('vmbr0')}) if item.net5|d({}) and item.net5.bridge is undefined else item.net5|default(omit) }}"
+    net6: "{{ item.net6 | combine({'bridge': proxmoxy__provision_bridge|d('vmbr0')}) if item.net6|d({}) and item.net6.bridge is undefined else item.net6|default(omit) }}"
+    net7: "{{ item.net7 | combine({'bridge': proxmoxy__provision_bridge|d('vmbr0')}) if item.net7|d({}) and item.net7.bridge is undefined else item.net7|default(omit) }}"
+    net8: "{{ item.net8 | combine({'bridge': proxmoxy__provision_bridge|d('vmbr0')}) if item.net8|d({}) and item.net8.bridge is undefined else item.net8|default(omit) }}"
+    net9: "{{ item.net9 | combine({'bridge': proxmoxy__provision_bridge|d('vmbr0')}) if item.net9|d({}) and item.net9.bridge is undefined else item.net9|default(omit) }}"
     node: "{{ item.node|default(omit) }}"
     onboot: "{{ item.onboot|default(omit) }}"
     ostype: "{{ item.ostype|default(omit) }}"
@@ -68,7 +68,7 @@
     swap: "{{ item.swap|default(omit) }}"
     tty: "{{ item.tty|default(omit) }}"
     unprivileged: "{{ item.unprivileged|default(omit) }}"
-  with_items: "{{ proxmoxy_provision_containers }}"
+  with_items: "{{ proxmoxy__provision_containers }}"
   register: __proxmoxy_register_containers
 
 # - debug:
@@ -81,7 +81,7 @@
 - name: Provision > start new containers
   shell: >
     pct start {{ item.item.vmid | d() }}
-  when: item and item.item.vmid | string not in __proxmoxy_prov_reg_vmids.stdout_lines and (proxmoxy_provision_post_cmds|length or item.item.onboot|d(False)|bool)
+  when: item and item.item.vmid | string not in __proxmoxy_prov_reg_vmids.stdout_lines and (proxmoxy__provision_post_cmds|length or item.item.onboot|d(False)|bool)
   with_items:
     - "{{ __proxmoxy_register_containers.results|d([]) }}"
 
@@ -91,12 +91,12 @@
   when: item[0] and item[0].item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines
   with_nested:
     - "{{ __proxmoxy_register_containers.results|d([]) }}"
-    - "{{ proxmoxy_provision_post_cmds|d([]) }}"
+    - "{{ proxmoxy__provision_post_cmds|d([]) }}"
   ignore_errors: True
 
 - name: Provision > stop new containers, unless onboot
   shell: >
     pct stop {{ item.item.vmid|d() }}
-  when: item and (item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines) and not item.item.onboot|d(False)|bool and proxmoxy_provision_post_cmds|length
+  when: item and (item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines) and not item.item.onboot|d(False)|bool and proxmoxy__provision_post_cmds|length
   with_items:
     - "{{ __proxmoxy_register_containers.results|d([]) }}"

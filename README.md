@@ -2,7 +2,7 @@
 
 Configures proxmox 4.x hosts and provisions lxc vm containers. It does this by directly interfacing with the proxmox shell tools on the proxmox host. There is no direct dependency on the proxmox http API or libraries like proxmoxer.
 
-For container management it ships with the [proxmox_prov](library/proxmoxy_prov.py) Ansible module. 
+For container management it ships with the [proxmox_prov](library/proxmox_prov.py) Ansible module. 
 
 Proxmoxy is able to:
 * Host: configure Proxmox host system
@@ -37,11 +37,11 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
 
 | Name                                  | Default                    | Type    | Description                             |
 | ------------------------------------- | -------------------------- | ------- | --------------------------------------- |
-| `proxmoxy_host_modules`               | `{}`                         | dict    | Load extra kernel modules on boot       |
-| `proxmoxy_host_tuntap`                | `true`                       | Boolean | Enable tun/tap for lxc ct               |
-| `proxmoxy_host_remove_nosubnag`       | `true`                       | Boolean | Remove no-subscription message on login |
-| `proxmoxy_host_repo_enterprise`       | `false`                      | Boolean | Disable/enable enterprise repo          |
-| `proxmoxy_host_repo_nosubs`           | `true`                       | Boolean | Enable no-subscription repo             |
+| `proxmoxy__host_modules`               | `{}`                         | dict    | Load extra kernel modules on boot       |
+| `proxmoxy__host_tuntap`                | `true`                       | Boolean | Enable tun/tap for lxc ct               |
+| `proxmoxy__host_remove_nosubnag`       | `true`                       | Boolean | Remove no-subscription message on login |
+| `proxmoxy__host_repo_enterprise`       | `false`                      | Boolean | Disable/enable enterprise repo          |
+| `proxmoxy__host_repo_nosubs`           | `true`                       | Boolean | Enable no-subscription repo             |
 
 ### Templates
 
@@ -49,11 +49,11 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
 
 | Name                                  | Default                        | Type    | Description                                                 |
 | ------------------------------------- | ------------------------------ | ------- | ----------------------------------------------------------- |
-| `proxmoxy_templates_storage`          | `"local"`                      | string  | Which storage to use for template storage                   |
-| `proxmoxy_templates_dir`              | `"/var/lib/vz/template/cache"` | string  | The template files directory                                |
-| `proxmoxy_templates_default`          | `"centos-7"`                   | string  | Default template used in provisioning                       |
-| `proxmoxy_templates_update`           | `false`                        | Boolean | Always update template list with `pveam update`?            |
-| `proxmoxy_templates`                  | `[]`                           | list    | Download these templates, can use python regex expressions. |
+| `proxmoxy__templates_storage`          | `"local"`                      | string  | Which storage to use for template storage                   |
+| `proxmoxy__templates_dir`              | `"/var/lib/vz/template/cache"` | string  | The template files directory                                |
+| `proxmoxy__templates_default`          | `"centos-7"`                   | string  | Default template used in provisioning                       |
+| `proxmoxy__templates_update`           | `false`                        | Boolean | Always update template list with `pveam update`?            |
+| `proxmoxy__templates`                  | `[]`                           | list    | Download these templates, can use python regex expressions. |
 
 ### Permission
 
@@ -61,10 +61,10 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
 
 | Name                                  | Default                     | Type          | Description                    |
 | ------------------------------------- | --------------------------  | ------------- | ------------------------------ |
-| `proxmoxy_permission_groups`          | `[{}]`                      | list of dicts | Create these groups            |
-| `proxmoxy_permission_users`           | `[{}]`                      | list of dicts | Create users, the uid "user@pam" has to exist on the host |
-| `proxmoxy_permission_roles`           | `[{}]`                      | list of dicts | Create roles           |
-| `proxmoxy_permission_acls`            | `[{}]`                      | list of dicts | ACL values will be appended to the current value |
+| `proxmoxy__permission_groups`          | `[{}]`                      | list of dicts | Create these groups            |
+| `proxmoxy__permission_users`           | `[{}]`                      | list of dicts | Create users, the uid "user@pam" has to exist on the host |
+| `proxmoxy__permission_roles`           | `[{}]`                      | list of dicts | Create roles           |
+| `proxmoxy__permission_acls`            | `[{}]`                      | list of dicts | ACL values will be appended to the current value |
 
 ### Storage
 
@@ -72,20 +72,20 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
 
 | Name                                  | Default                     | Type          | Description                    |
 | ------------------------------------- | --------------------------  | ------------- | ------------------------------ |
-| `proxmoxy_storage`                    | `[{}]`                      | list of dicts | PVE storages to create         |
-| `proxmoxy_storage_content`            | `['images', 'rootdir']`     | list          | Default storage content        |
-| `proxmoxy_storage_nodes`              | `[]`                        | list          | Default list of nodes for storages, leave empty for all. |
-| `proxmoxy_storage_changes`            | `true`                      | Boolean       | Always set storage settings.   |
-| `proxmoxy_storage_remove`             | `[]`                        | list          | List of storage items to remove. Items in this list normally should not appear in `proxmoxy_storage` |
+| `proxmoxy__storage`                    | `[{}]`                      | list of dicts | PVE storages to create         |
+| `proxmoxy__storage_content`            | `['images', 'rootdir']`     | list          | Default storage content        |
+| `proxmoxy__storage_nodes`              | `[]`                        | list          | Default list of nodes for storages, leave empty for all. |
+| `proxmoxy__storage_changes`            | `true`                      | Boolean       | Always set storage settings.   |
+| `proxmoxy__storage_remove`             | `[]`                        | list          | List of storage items to remove. Items in this list normally should not appear in `proxmoxy__storage` |
 
 ### Provision
 
 | Name                                  | Default                    | Type    | Description                    |
 | ------------------------------------- | -------------------------- | ------- | ------------------------------ |
-| `proxmoxy_provision_secret`           | `true`                     | Boolean | Read/save credentials from secret folder, [debops.secret](https://github.com/debops/ansible-secret) compatible |
-| `proxmoxy_provision_bridge`           | `"vmbr0"`                  | string  | Default bridge definition for netX networks |
-| `proxmoxy_provision_containers`       | `[]`                       | list    | List of container configurations |
-| `proxmoxy_provision_post_cmds`        | `[]`                       | list    | List of simple commands to run in new containers, may use quotes, but no pipes or redirection. |
+| `proxmoxy__provision_secret`           | `true`                     | Boolean | Read/save credentials from secret folder, [debops.secret](https://github.com/debops/ansible-secret) compatible |
+| `proxmoxy__provision_bridge`           | `"vmbr0"`                  | string  | Default bridge definition for netX networks |
+| `proxmoxy__provision_containers`       | `[]`                       | list    | List of container configurations |
+| `proxmoxy__provision_post_cmds`        | `[]`                       | list    | List of simple commands to run in new containers, may use quotes, but no pipes or redirection. |
 
 
 ## Example Playbook
@@ -93,21 +93,21 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
 ```yaml
 - hosts: all
   vars:
-    proxmoxy_host_modules:
+    proxmoxy__host_modules:
       lm-sensors: w83627ehf
 
-    proxmoxy_templates:
+    proxmoxy__templates:
     - 'centos-[67]{1}-.*'
     - 'debian-8..-standard'
     - 'ubuntu-16.[0-9]+-standard']
 
-    proxmoxy_permission_groups:
+    proxmoxy__permission_groups:
       - name: admins
         comment: 'Admins Group'
       - name: group1
         comment: 'another group'
 
-    proxmoxy_permission_users:
+    proxmoxy__permission_users:
       - name: myuser@pam
         comment: 'Dis my user'
         email: 'myuser@bla.at'
@@ -119,13 +119,13 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
         lastname: 'Muster'
         password: Null
 
-    proxmoxy_permission_roles:
+    proxmoxy__permission_roles:
       - name: Sys_Power
         privs:
           - 'Sys.PowerMgmt'
           - 'Sys.Console'
 
-    proxmoxy_permission_acls:
+    proxmoxy__permission_acls:
       - path: '/'
         roles:
           - 'PVEAuditor'
@@ -136,7 +136,7 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
         groups:
           - 'group1'
 
-    proxmoxy_storage:
+    proxmoxy__storage:
       - type: zfspool  # mandatory 'type, id, pool'
         id: storage-zfs
         pool: tank/data
@@ -159,11 +159,11 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
         maxfiles: 7
         content: ['images', 'rootdir', 'vztmpl', 'backup', 'iso']
 
-    proxmoxy_storage_remove:
+    proxmoxy__storage_remove:
     - 'tank-remove'
     - 'andremoveme'
 
-    proxmoxy_provision_containers:
+    proxmoxy__provision_containers:
       - vmid: 210
         state: present
         ostemplate: "centos-7.*"

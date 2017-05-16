@@ -1,37 +1,37 @@
 ---
 
 ## Host system
-proxmoxy_host_modules: {}
-proxmoxy_host_tuntap: True  # enable tun/tap for lxc CTs.
-proxmoxy_host_remove_nosubnag: True  # remove no subscription login message.
-proxmoxy_host_repo_enterprise: False  # remove enterprise apt repo if false
-proxmoxy_host_repo_nosubs: True  # enable no-subscription repo
+proxmoxy__host_modules: {}
+proxmoxy__host_tuntap: True  # enable tun/tap for lxc CTs.
+proxmoxy__host_remove_nosubnag: True  # remove no subscription login message.
+proxmoxy__host_repo_enterprise: False  # remove enterprise apt repo if false
+proxmoxy__host_repo_nosubs: True  # enable no-subscription repo
 
 ## Templates
-proxmoxy_templates_storage: "local"
-proxmoxy_templates_dir: "/var/lib/vz/template/cache"
+proxmoxy__templates_storage: "local"
+proxmoxy__templates_dir: "/var/lib/vz/template/cache"
 # can use regex pattern
-proxmoxy_templates_default: "centos-7"
+proxmoxy__templates_default: "centos-7"
 # Should pveam update be called always?
-proxmoxy_templates_update: False
+proxmoxy__templates_update: False
 # pveam download templates
-proxmoxy_templates: []
+proxmoxy__templates: []
 
 ## Permissions, Users, ...
-proxmoxy_permission_groups: [{}]
-proxmoxy_permission_users: [{}]  # uid user@pam must exist on linux host.
-proxmoxy_permission_roles: [{}]
-proxmoxy_permission_acls: [{}]
+proxmoxy__permission_groups: [{}]
+proxmoxy__permission_users: [{}]  # uid user@pam must exist on linux host.
+proxmoxy__permission_roles: [{}]
+proxmoxy__permission_acls: [{}]
 
 ## Proxmox storage
-proxmoxy_storage: [{}]
-proxmoxy_storage_content: ['images', 'rootdir']
-proxmoxy_storage_nodes: []
-proxmoxy_storage_changes: True  # Always set options, or don't
-proxmoxy_storage_remove: []  # storages to remove. Place here to recreate anew.
+proxmoxy__storage: [{}]
+proxmoxy__storage_content: ['images', 'rootdir']
+proxmoxy__storage_nodes: []
+proxmoxy__storage_changes: True  # Always set options, or don't
+proxmoxy__storage_remove: []  # storages to remove. Place here to recreate anew.
 
 ## Provision lxc containers
-proxmoxy_provision_secret: True  # read/save password to from folder "secret/cred/<host>/root/pw"
-proxmoxy_provision_bridge: 'vmbr0'
-proxmoxy_provision_containers: []  # list of container configs
-proxmoxy_provision_post_cmds: []  # run commands in new containers
+proxmoxy__provision_secret: True  # read/save password to from folder "secret/cred/<host>/root/pw"
+proxmoxy__provision_bridge: 'vmbr0'
+proxmoxy__provision_containers: []  # list of container configs
+proxmoxy__provision_post_cmds: []  # run commands in new containers

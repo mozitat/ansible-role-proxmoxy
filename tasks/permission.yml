@@ -12,7 +12,7 @@
     cmd=groupadd; if grep -q "^group:{{ item.name }}" /etc/pve/user.cfg; then cmd=groupmod; fi;
     pveum $cmd {{ item.name }}
     {{ (' -comment "' ~ item.comment + '"') if item.comment is defined else '' }}
-  with_items: "{{ proxmoxy_permission_groups }}"
+  with_items: "{{ proxmoxy__permission_groups }}"
   when: item and not __proxmoxy_users.stdout | search("group:" + item.name|default(omit) + ":[^:]*:" + item.comment|default('[^:]') + ":")
 
 # Better solution for useradd/usermod problem.
@@ -28,7 +28,7 @@
     {{ (' -keys "' ~ item.key ~ '"') if item.key is defined else '' }}
     {{ (' -lastname "' ~ item.lastname ~ '"') if item.lastname is defined else '' }}
     {{ (' -password "' ~ item.password ~ '"') if item.password is defined and 'user:' ~ item.name not in __proxmoxy_users.stdout else '' }}
-  with_items: "{{ proxmoxy_permission_users }}"
+  with_items: "{{ proxmoxy__permission_users }}"
   when: >
     item and not __proxmoxy_users.stdout |
     search( "user:{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:".format(
@@ -41,7 +41,7 @@
   shell: >
     pveum {{ 'rolemod' if 'role:' ~ item.name in __proxmoxy_users.stdout else 'roleadd'  }} {{ item.name }}
     {{ (' -privs "' ~ item.privs|sort|join(',') ~ '"') if item.privs is defined else '' }}
-  with_items: "{{ proxmoxy_permission_roles }}"
+  with_items: "{{ proxmoxy__permission_roles }}"
   when: >
     item and not __proxmoxy_users.stdout |
     search( "role:{0}:{1}:".format(
@@ -54,7 +54,7 @@
     {{ (' -groups "' ~ item.groups|sort|join(',') ~ '"') if item.groups is defined else '' }}
     {{ (' -propagate "' ~ item.propagate ~ '"') if item.propagate is defined else '' }}
     {{ (' -users "' ~ item.users|sort|join(',') ~ '"') if item.users is defined else '' }}
-  with_items: "{{ proxmoxy_permission_acls }}"
+  with_items: "{{ proxmoxy__permission_acls }}"
   when: >
     item and not __proxmoxy_users.stdout |
     search( "acl:{0}:{1}:{2}:{3}:".format(
