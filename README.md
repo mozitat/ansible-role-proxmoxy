@@ -97,9 +97,9 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
       lm-sensors: w83627ehf
 
     proxmoxy__templates:
-    - 'centos-[67]{1}-.*'
-    - 'debian-8..-standard'
-    - 'ubuntu-16.[0-9]+-standard']
+      - 'centos-[67]{1}-.*'
+      - 'debian-8..-standard'
+      - 'ubuntu-16.[0-9]+-standard']
 
     proxmoxy__permission_groups:
       - name: admins
@@ -160,8 +160,8 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
         content: ['images', 'rootdir', 'vztmpl', 'backup', 'iso']
 
     proxmoxy__storage_remove:
-    - 'tank-remove'
-    - 'andremoveme'
+      - 'tank-remove'
+      - 'andremoveme'
 
     proxmoxy__provision_containers:
       - vmid: 210
