@@ -25,7 +25,10 @@
   proxmox_prov:
     state: "{{ item.state|default('present') }}"
     vmid: "{{ item.vmid }}"
-    password: "{{ lookup('password', secret|d('secret') + '/cred/' + item.hostname|default('lxc') + ('.' + item.searchdomain if item.searchdomain|d() else '') + '/root/pw length=20') if proxmoxy__provision_secret else item.password|default(omit) }}"
+    password: "{{ lookup('password', secret|d('secret') + '/cred/' +
+                  item.hostname|default('lxc') + ('.' + item.searchdomain if
+                   item.searchdomain|d() else '') + '/root/pw length=32') if 
+                   proxmoxy__provision_secret else item.password|default(omit) }}"
     hostname: "{{ item.hostname|default('lxc') }}"
     ostemplate: "{{ proxmoxy__templates_dir }}/{{ __proxmoxy_ct_template_match[item.vmid]|default(omit) }}"
     arch: "{{ item.arch|default(omit) }}"
