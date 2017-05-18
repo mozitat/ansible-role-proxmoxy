@@ -92,6 +92,7 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
 
 ## Example Playbook
 
+
 ```yaml
 - hosts: all
   vars:
@@ -183,6 +184,8 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
   roles:
     - role: mozitat.proxmoxy
 ```
+
+For a more complete container definition with all options see [`examples/containers.yml`](examples/containers.yml).
 
 ## License
 

@@ -1,0 +1,72 @@
+---
+
+### Example of container with all the options possible
+proxmoxy__provision_containers:
+  - vmid: 909
+    state: present
+    password: abc123
+    hostname: supervm01
+    ostemplate: 'centos7.*'
+    # should be sorted from here on.
+    arch: amd64
+    cmode: tty
+    console: 1
+    cores: 2
+    cpuunits: 1025
+    description: All possible params on this CT are set via ansible.
+    memory: 768
+    # set some but not all mountpoints.
+    mp0:
+      storage: tank_multi
+      volume: subvol-207-mp0
+      mp: /ct_mount_mp0
+      size: 4G
+      acl: True
+    mp2:
+      storage: tank_multi
+      volume: subvol-207-mp2
+      mp: /ct_mount_mp2
+      size: 5G
+      acl: True
+    # Dir mount, should not be created, dir must exist, size must be 0T
+    mp8:
+      volume: /mnt/dirvolume
+      mp: /ct_mount_mp8
+      size: 0T
+    # Without size its a bind mount (not listed by df inside CT)
+    mp9:
+      volume: /mnt/bindmount
+      mp: /ct_mount_mp9
+    nameserver: 10.0.0.4 10.0.0.3
+    # For netX: enclose int values in quotes: tag, mtu
+    net0:
+      name: eth0
+      ip: 10.0.0.10/24
+      gw: 10.0.0.1
+    net1:
+      name: eth1
+      bridge: vmbr0
+      ip: 10.0.0.11/24
+      gw: 10.0.0.1
+      hwaddr: B6:75:39:CC:46:B1
+      tag: '4'
+      mtu: '1420'
+      type: veth
+    node: proxmoxxy
+    onboot: False
+    ostype: centos
+    # pool is not saved inside vmid.cfg and cannot be set with pvesh config, only create.
+    pool: mytestpool
+    protection: False
+    rootfs:
+      storage: local-zfs
+      size: 7G
+    searchdomain: domain.local
+    ssh_public_keys: ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAgEAl7DTLWEoWutlNqF/IamAlooooongTestKeY...
+    startup: 9
+    storage: local-zfs  # unnecessary if defined in rootfs
+    swap: 256
+    # template: False  # does not seem to be implemented yet
+    # timeout: 30  # only for shutdown ops.
+    tty: 3
+    unprivileged: True
