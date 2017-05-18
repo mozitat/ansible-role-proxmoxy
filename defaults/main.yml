@@ -35,3 +35,5 @@ proxmoxy__provision_secret: True  # read/save password to from folder "secret/cr
 proxmoxy__provision_bridge: 'vmbr0'
 proxmoxy__provision_containers: []  # list of container configs
 proxmoxy__provision_post_cmds: []  # run commands in new containers
+proxmoxy__provision_bootstrap_file: 'hosts/bootstrap'  # if !="" write new containers into this file
+proxmoxy__provision_bootstrap_entry: 'bootstrap_hosts'  # inventory entry name

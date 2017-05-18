@@ -86,6 +86,8 @@ All variables are defined in [`defaults/main.yml`](defaults/main.yml). See the E
 | `proxmoxy__provision_bridge`           | `"vmbr0"`                  | string  | Default bridge definition for netX networks |
 | `proxmoxy__provision_containers`       | `[]`                       | list    | List of container configurations |
 | `proxmoxy__provision_post_cmds`        | `[]`                       | list    | List of simple commands to run in new containers, may use quotes, but no pipes or redirection. |
+| `proxmoxy__provision_bootstrap_file`        | `'hosts/bootstrap'`                       | string    | Write inventory entries for new containers into this file, disable by setting to "" |
+| `proxmoxy__provision_bootstrap_entry`        | `'bootstrap_hosts'`                       | string    | The inventory section name in `proxmoxy__provision_bootstrap_file` |
 
 
 ## Example Playbook

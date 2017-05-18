@@ -103,3 +103,23 @@
   when: item and (item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines) and not item.item.onboot|d(False)|bool and proxmoxy__provision_post_cmds|length
   with_items:
     - "{{ __proxmoxy_register_containers.results|d([]) }}"
+
+- name: Provision > ensure bootstrap hosts file exists
+  local_action: lineinfile dest='{{ proxmoxy__provision_bootstrap_file }}'
+                regexp="^\[\S+\]$" line='[{{ proxmoxy__provision_bootstrap_entry }}]'
+                state=present
+  # workaround with length, "hosts/bootstrap" throws error like unknown variable "hosts"
+  when: proxmoxy__provision_bootstrap_file|d('')|string|length
+  become: False
+
+- name: Provision > write container to bootstrapping hosts file
+  local_action: lineinfile dest='{{ proxmoxy__provision_bootstrap_file }}'
+                regexp="^{{ item.item.hostname|d() + ('.' + item.item.searchdomain if item.item.searchdomain is defined else '') }}.*$"
+                line='{{ item.item.hostname|d() + ("." + item.item.searchdomain if item.item.searchdomain is defined else "") }}
+                ansible_host={{ item.item.net0.ip|d('127.0.1.1')|ipaddr("address") if item.item.net0 is defined else '127.0.1.1' }}
+                ansible_user=root'
+                state=present
+  when: proxmoxy__provision_bootstrap_file|d('')|string|length and item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines
+  with_items:
+    - "{{ __proxmoxy_register_containers.results|d([]) }}"
+  become: False
