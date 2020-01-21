@@ -1,4 +1,16 @@
 ---
+
+- name: Main > get proxmox version
+  shell: pveversion | cut -d'/' -f2
+  register: __proxmox_version
+  changed_when: false
+
+# assume 6.0 if cannot determine version (i.e. in check mode)
+- set_fact:
+    proxmoxy__pve_version: "{{ __proxmox_version.stdout if __proxmox_version.stdout is 
+                            defined else '6.0' }}"
+    # cacheable: yes
+
 # Host system
 - include: host.yml
   tags:

@@ -5,13 +5,13 @@
 # proxmox disable enterprise repo
 - name: Host > disable/enable proxmox enterprise repo
   apt_repository:
-    repo: deb https://enterprise.proxmox.com/debian jessie pve-enterprise
+    repo: deb https://enterprise.proxmox.com/debian/pve {{ ansible_distribution_release }} pve-enterprise
     state: "{{ 'present' if proxmoxy__host_repo_enterprise else 'absent' }}"
-    filename: pve-enterprise
+    filename: pve-enterprise.list
 
 - name: enable/disable proxmox no-subscription repo
   apt_repository:
-    repo: deb http://download.proxmox.com/debian jessie pve-no-subscription
+    repo: deb http://download.proxmox.com/debian/pve {{ ansible_distribution_release }} pve-no-subscription
     state: "{{ 'present' if proxmoxy__host_repo_nosubs else 'absent' }}"
     filename: pve-no-subscription
 
@@ -35,7 +35,9 @@
 
 - name: Host > remove proxmox ui no-subscription warning message
   lineinfile:
-    path: /usr/share/pve-manager/ext6/pvemanagerlib.js
+    # not sure about version 5
+    path: "{{ '/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js' if proxmoxy__pve_version is
+           version('5', '>=') else '/usr/share/pve-manager/ext6/pvemanagerlib.js' }}"
     regexp: "(\\s*if \\(data.status !== 'Active')(\\) {)"
     line: '\1 && false\2'
     backrefs: yes
