@@ -376,41 +376,41 @@ MP_NAMES = ['mp' + str(x) for x in range(0, 10)] + ['rootfs']
 
 
 def pvesh(action='get', url='/', data=dict()):
-    cmd = 'pvesh {0} {1}'.format(action, url)
+    cmd = 'pvesh {0} {1} --output-format json'.format(action, url)
     if data:
-        cmd = 'pvesh {0} {1} {2}'.format(action, url,
+        cmd = 'pvesh {0} {1} {2} --output-format json'.format(action, url,
                                          get_api_format(data))
     try:
         out = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-        dic = get_api_status_and_data(out, True)
+        dic = get_api_status_and_data(out, True, 0)
         dic.update({'rc': 0, 'cmd': cmd})
         return dic
         # return {'status': status, 'status_code': status_code, 'data': data}
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError as e:  # thrown if non-zero exit code
         err = e.output
         # print(err.decode('utf-8').strip() + ' : ' + cmd)
-        dic = get_api_status_and_data(err, False)
+        dic = get_api_status_and_data(err, False, e.returncode)
         dic.update({'rc': e.returncode, 'cmd': cmd})
         return dic
 
-
-def get_api_status_and_data(rawdata, json_fmt=True):
+# no first line like "200 OK" since 5.? 
+def get_api_status_and_data(rawdata, json_fmt=True, exitcode=255):
     rawdata = rawdata.strip()
-    status_raw = rawdata.split('\n')[0]
-    status = ' '.join(status_raw.split()[1:])
-    # catch case where pvesh does not return status code in first line
-    try:
-        status_code = int(status_raw.split()[0])
-    except ValueError:
-        status_code = status_raw.split()[0]
+    status_code = exitcode
+    if exitcode == 0:  # fake pre 5.x behaviour with http codes
+      status_code = 200
+    if(status_code == 200):
+      status = 'OK'
+    else:
+      status = 'FAIL'
     if json_fmt:
         # catch case where pvesh does not return json data.
         try:
-            data = json.loads(''.join(rawdata.split('\n')[1:]))
+            data = json.loads(rawdata)
         except ValueError:
-            data = ' '.join(rawdata.split('\n')[1:])
+            data = rawdata
     else:
-        data = ' '.join(rawdata.split('\n')[1:])
+        data = rawdata
     return {'status_code': status_code, 'status': status, 'data': data}
 
 

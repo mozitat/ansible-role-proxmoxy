@@ -1,5 +1,6 @@
-import proxmox_prov as pv
-from conftest import CHANGE_DATA, mergedict, DIB, DCH, DEXP
+from __future__ import absolute_import
+from . import proxmox_prov as pv
+from .conftest import CHANGE_DATA, mergedict, DIB, DCH, DEXP
 import pytest
 
 # run with watch
@@ -195,7 +196,7 @@ def test_pve_ct_start(inp, exp):
         e, ch, meta = pv.pve_ct_start(inp)
         assert e == exp[0]
         assert ch == exp[1]
-        assert exp[2].items()[0] in meta.items()
+        assert list(exp[2].items())[0] in list(meta.items())
 
 
 @pytest.mark.parametrize('inp, exp', [
@@ -213,7 +214,7 @@ def test_pve_ct_stop(inp, exp):
         e, ch, meta = pv.pve_ct_stop(inp)
         assert e == exp[0]
         assert ch == exp[1]
-        assert exp[2].items()[0] in meta.items()
+        assert list(exp[2].items())[0] in list(meta.items())
 
 
 @pytest.mark.parametrize('inp, exp', [
@@ -230,7 +231,7 @@ def test_pve_ct_shutdown(inp, exp):
         e, ch, meta = pv.pve_ct_shutdown(inp)
         assert e == exp[0]
         assert ch == exp[1]
-        assert exp[2].items()[0] in meta.items()
+        assert list(exp[2].items())[0] in list(meta.items())
 
 
 @pytest.mark.parametrize('inp, exp', [

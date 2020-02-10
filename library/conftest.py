@@ -2,8 +2,7 @@ import pytest
 import subprocess
 
 API_GET = {
-    '/cluster/resources': '''200 OK
-    [
+    '/cluster/resources': '''[
        {
           "cpu" : 0,
           "disk" : 0,
@@ -140,7 +139,6 @@ API_GET = {
     ]''',
     '/nodes/moximoz/lxc/100/config':
     '''
-    200 OK
     {
        "arch" : "amd64",
        "description" : "My first LXC test container\n",
@@ -154,7 +152,6 @@ API_GET = {
     ''',
     '/nodes/moximoz/lxc/201/config':
     '''
-    200 OK
     {
        "arch" : "amd64",
        "cores" : 1,
@@ -171,7 +168,6 @@ API_GET = {
     ''',
     '/nodes/moximoz/lxc/203/config':
     '''
-    200 OK
     {
         "arch" : "amd64",
         "digest" : "f4c17968e26eb5cde6d3a6e955d5efbb2120d02e",
@@ -184,7 +180,6 @@ API_GET = {
     ''',
     '/nodes/moximoz/storage/local-zfs/content':
     '''
-    200 OK
     [
        {
           "content" : "images",
@@ -252,7 +247,7 @@ API_GET = {
     ]
     ''',
     '/nodes/moximoz/lxc/100/status/current':
-    '''200 OK
+    '''
     {
        "cpu" : 0,
        "cpus" : 2,
@@ -278,7 +273,7 @@ API_GET = {
     }
     ''',
     '/nodes/moximoz/lxc/203/status/current':
-    '''200 OK
+    '''
     {
         "cpu" : 0,
         "disk" : 249036800,
@@ -299,7 +294,7 @@ API_GET = {
     }
     ''',
     '/nodes/moximoz/lxc/204/status/current':
-    '''200 OK
+    '''
     {
        "cpu" : 0,
        "cpus" : 2,
@@ -332,39 +327,39 @@ API_GET = {
 API_SET = {}
 API_CREATE = {
     '/nodes/moximoz/lxc/100/status/start':
-    '''200 OK
+    '''
     UPID:moximoz:00000EA7:00003052:58AACFA3:vzstart:100:root@pam:
     ''',
     '/nodes/moximoz/lxc/100/status/stop':
-    '''200 OK
+    '''
     UPID:moximoz:0000164D:0000ED66:58AAD187:vzstop:100:root@pam:
     ''',
     '/nodes/moximoz/lxc/100/status/shutdown':
-    '''200 OK
+    '''
     UPID:moximoz:00002D4D:0014366D:58AEF68B:vzshutdown:100:root@pam:
     ''',
     '/nodes/moximoz/lxc/203/status/start':
-    '''200 OK
+    '''
     UPID:moximoz:00000EA7:00003052:58AACFA3:vzstart:203:root@pam:
     ''',
     '/nodes/moximoz/lxc/203/status/stop':
-    '''200 OK
+    '''
     UPID:moximoz:00000EA7:00003052:58AACFA3:vzstop:203:root@pam:
     ''',
     '/nodes/moximoz/lxc/203/status/shutdown':
-    '''200 OK
+    '''
     UPID:moximoz:00002D4D:0014366D:58AEF68B:vzshutdown:203:root@pam:
     ''',
     '/nodes/moximoz/lxc/204/status/start':
-    '''200 OK
+    '''
     UPID:moximoz:00000EA7:00003052:58AACFA3:vzstart:204:root@pam:
     ''',
     '/nodes/moximoz/lxc/204/status/stop':
-    '''200 OK
+    '''
     UPID:moximoz:00000EA7:00003052:58AACFA3:vzstop:204:root@pam:
     ''',
     '/nodes/moximoz/lxc/204/status/shutdown':
-    '''200 OK
+    '''
     UPID:moximoz:00002D4D:0014366D:58AEF68B:vzshutdown:204:root@pam:
     ''',
     }
