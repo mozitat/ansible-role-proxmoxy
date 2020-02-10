@@ -13,7 +13,7 @@
     pveum $cmd {{ item.name }}
     {{ (' -comment "' ~ item.comment + '"') if item.comment is defined else '' }}
   with_items: "{{ proxmoxy__permission_groups }}"
-  when: item and not __proxmoxy_users.stdout | search("group:" + item.name|default(omit) + ":[^:]*:" + item.comment|default('[^:]') + ":")
+  when: item and not __proxmoxy_users.stdout | regex_search("group:" + item.name|default(omit) + ":[^:]*:" + item.comment|default('[^:]') + ":")
 
 # Better solution for useradd/usermod problem.
 - name: Permission > create/modify users
@@ -31,7 +31,7 @@
   with_items: "{{ proxmoxy__permission_users }}"
   when: >
     item and not __proxmoxy_users.stdout |
-    search( "user:{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:".format(
+    regex_search( "user:{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:".format(
     item.name|default(omit), item.enable|int|default(1),
     item.expire|int|default(0), item.firstname|default('[^:]*'), item.lastname|default('[^:]*'),
     item.email|default('[^:]*'), item.comment|default('[^:]*'), item.key|default('[^:]*')
@@ -44,7 +44,7 @@
   with_items: "{{ proxmoxy__permission_roles }}"
   when: >
     item and not __proxmoxy_users.stdout |
-    search( "role:{0}:{1}:".format(
+    regex_search( "role:{0}:{1}:".format(
     item.name|default(omit), item.privs|sort|join(',')|default('[^:]*') ))
 
 # Limitations: Doesn't seem to set users, only groups. Groups are always appended and not deleted. The aclmod mode does not work like above modes and replace values.
@@ -57,7 +57,7 @@
   with_items: "{{ proxmoxy__permission_acls }}"
   when: >
     item and not __proxmoxy_users.stdout |
-    search( "acl:{0}:{1}:{2}:{3}:".format(
+    regex_search( "acl:{0}:{1}:{2}:{3}:".format(
     item.propagate|default(1), item.path|default('/'),
     '@?' ~ (item.groups|default([]) + item.users|default([]))|sort|join(',@?')|default('[^:]*'),
     item.roles|sort|join(',')|default('[^:]*') ))

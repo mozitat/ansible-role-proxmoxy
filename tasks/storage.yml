@@ -16,7 +16,7 @@
   with_items: "{{ proxmoxy__storage_remove }}"
   # not sure if \n in string from above is evaluated
   when: >
-    item and __proxmoxy_storage_status.stdout | search( '[\nn]' ~ item ~ '\s+')
+    item and __proxmoxy_storage_status.stdout | regex_search( '[\nn]' ~ item ~ '\s+')
 
 - name: Storage > get storage list after remove
   command: pvesm status
@@ -44,8 +44,8 @@
     {{ ' -disable "' ~ item.disable|d(0) ~ '"' }}
   with_items: "{{ proxmoxy__storage }}"
   when: >
-    item and not __proxmoxy_storage_status.stdout |
-    search( "{0}\s+{1}\s".format(item.id|default(omit), item.type|default(omit)))
+    item and not __proxmoxy_storage_status.stdout | 
+    regex_search("{0}\s+{1}\s".format(item.id|default(omit), item.type|default(omit)))
   # how create on already defined would not fail the playbook.
   # register: __result
   # failed_when: "__result.rc != 0 and 'already defined' not in __result.stderr"
@@ -69,7 +69,7 @@
   with_items: "{{ proxmoxy__storage }}"
   when: >
     item and proxmoxy__storage_changes and 
-    __proxmoxy_storage_status.stdout | search( item.id ~ '\s+' ~ item.type )
+    __proxmoxy_storage_status.stdout | regex_search( item.id ~ '\s+' ~ item.type )
 
 
 # Alternative idea from: https://github.com/reminec/ansible-role-proxmox/blob/master/tasks/storage.yml

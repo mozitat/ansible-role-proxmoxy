@@ -16,18 +16,18 @@
   tags:
     - proxmoxy
 
-# Templates
-- include: templates.yml
-  tags:
-    - proxmoxy
-
 # Permissions
 - include: permission.yml
   tags:
     - proxmoxy
 
-# # Storage
+# Storage
 - include: storage.yml
+  tags:
+    - proxmoxy
+
+# Templates
+- include: templates.yml
   tags:
     - proxmoxy
 
