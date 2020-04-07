@@ -23,9 +23,6 @@
   register: __proxmoxy_storage_status
   changed_when: false
 
-- name: Debug XXX print value of xxx
-  debug: var=__proxmoxy_storage_status
-
 - name: Storage > create storage
   shell: >
     pvesm add {{ item.type }} {{ item.id }}
