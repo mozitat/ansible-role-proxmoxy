@@ -20,6 +20,7 @@
   set_fact:
     __proxmoxy_ct_template_match: "{{ __proxmoxy_ct_template_match|default({}) | combine( {item.vmid: __proxmoxy_prov_reg_templates.stdout_lines|select('search', item.ostemplate|default(proxmoxy__templates_default))|sort|last|string} ) }}"
   with_items: "{{ proxmoxy__provision_containers }}"
+  when: not ansible_check_mode
 
 - name: provision > configure lxc container
   proxmox_prov:
@@ -84,14 +85,14 @@
 - name: Provision > start new containers
   shell: >
     pct start {{ item.item.vmid | d() }}
-  when: item and item.item.vmid | string not in __proxmoxy_prov_reg_vmids.stdout_lines and (proxmoxy__provision_post_cmds|length or item.item.onboot|d(False)|bool)
+  when: not ansible_check_mode and item and item.item.vmid | string not in __proxmoxy_prov_reg_vmids.stdout_lines and (proxmoxy__provision_post_cmds|length or item.item.onboot|d(False)|bool)
   with_items:
     - "{{ __proxmoxy_register_containers.results|d([]) }}"
 
 - name: Provision > execute commands on new containers
   shell: >
     echo '{{ item[1] }}' | pct enter {{ item[0].item.vmid|d() }}
-  when: item[0] and item[0].item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines
+  when: not ansible_check_mode and item[0] and item[0].item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines
   with_nested:
     - "{{ __proxmoxy_register_containers.results|d([]) }}"
     - "{{ proxmoxy__provision_post_cmds|d([]) }}"
@@ -100,7 +101,7 @@
 - name: Provision > stop new containers, unless onboot
   shell: >
     pct stop {{ item.item.vmid|d() }}
-  when: item and (item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines) and not item.item.onboot|d(False)|bool and proxmoxy__provision_post_cmds|length
+  when: not ansible_check_mode and item and (item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines) and not item.item.onboot|d(False)|bool and proxmoxy__provision_post_cmds|length
   with_items:
     - "{{ __proxmoxy_register_containers.results|d([]) }}"
 
@@ -119,7 +120,7 @@
                 ansible_host={{ item.item.net0.ip|d('127.0.1.1')|ipaddr("address") if item.item.net0 is defined else '127.0.1.1' }}
                 ansible_user=root'
                 state=present
-  when: proxmoxy__provision_bootstrap_file|d('')|string|length and item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines
+  when: not ansible_check_mode and proxmoxy__provision_bootstrap_file|d('')|string|length and item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines
   with_items:
     - "{{ __proxmoxy_register_containers.results|d([]) }}"
   become: False

@@ -14,6 +14,7 @@
     __proxmoxy_templates_list: "{{ __proxmoxy_templates_list|default([]) + __proxmoxy_templates_all_list.stdout_lines|select('search', item)|sort }}"
   # changed_when: false
   with_items: "{{ proxmoxy__templates }}"
+  when: not ansible_check_mode
 
 - name: Templates > download matching templates
   shell: >

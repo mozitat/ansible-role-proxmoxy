@@ -23,6 +23,9 @@
   register: __proxmoxy_storage_status
   changed_when: false
 
+- name: Debug XXX print value of xxx
+  debug: var=__proxmoxy_storage_status
+
 - name: Storage > create storage
   shell: >
     pvesm add {{ item.type }} {{ item.id }}
@@ -44,8 +47,9 @@
     {{ ' -disable "' ~ item.disable|d(0) ~ '"' }}
   with_items: "{{ proxmoxy__storage }}"
   when: >
-    item and not __proxmoxy_storage_status.stdout | 
+    not ansible_check_mode and item and not __proxmoxy_storage_status.stdout | 
     regex_search("{0}\s+{1}\s".format(item.id|default(omit), item.type|default(omit)))
+
   # how create on already defined would not fail the playbook.
   # register: __result
   # failed_when: "__result.rc != 0 and 'already defined' not in __result.stderr"
