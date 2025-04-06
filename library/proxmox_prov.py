@@ -472,6 +472,10 @@ def get_storage_volumes(node, storage):
 def get_volume(node, storage, volid):
     '''Search list from get_storage_volumes for item with volid or name.'''
     result = get_storage_volumes(node, storage)
+    if 'status' in result and result['status'] == 'FAIL':
+      print("API call failed: " + str(result['data']))
+      raise RuntimeError("API call failed: " + str(result['data']))
+
     volumes = result['data']
     for item in volumes:
         if 'volid' in item and volid == item['volid']:

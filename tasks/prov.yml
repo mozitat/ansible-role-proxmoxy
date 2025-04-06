@@ -26,10 +26,9 @@
   proxmox_prov:
     state: "{{ item.state|default('present') }}"
     vmid: "{{ item.vmid }}"
-    password: "{{ lookup('password', secret|d('secret') + '/cred/' +
+    password: "{{ item.password|default(omit) if item.password is defined else lookup('password', secret|d('secret') + '/credentials/' +
                   item.hostname|default('lxc') + ('.' + item.searchdomain if
-                   item.searchdomain|d() else '') + '/root/pw length=32') if 
-                   proxmoxy__provision_secret else item.password|default(omit) }}"
+                   item.searchdomain|d() else '') + '/root/pw length=32') }}"
     hostname: "{{ item.hostname|default('lxc') }}"
     ostemplate: "{{ proxmoxy__templates_dir }}/{{ __proxmoxy_ct_template_match[item.vmid]|default(omit) }}"
     arch: "{{ item.arch|default(omit) }}"
@@ -75,6 +74,26 @@
   with_items: "{{ proxmoxy__provision_containers }}"
   register: __proxmoxy_register_containers
 
+- name: Provision > enable lxc idmapping uid
+  lineinfile:
+    dest: "{{ proxmoxy__provision_config_path + '/' + item.vmid|string + '.conf'}}"
+    regexp: "^lxc.idmap:.u {{ proxmoxy__provision_idmap_from|string + ' ' + proxmoxy__provision_idmap_start|string + ' ' + proxmoxy__provision_idmap_range|string }}"
+    line: "lxc.idmap: u {{ proxmoxy__provision_idmap_from|string + ' ' + proxmoxy__provision_idmap_start|string + ' ' + proxmoxy__provision_idmap_range|string }}"
+    create: no
+    state: present
+  when: proxmoxy__provision_idmapping
+  with_items: "{{ proxmoxy__provision_containers }}"
+
+- name: Provision > enable lxc idmapping gid
+  lineinfile:
+    dest: "{{ proxmoxy__provision_config_path + '/' + item.vmid|string + '.conf'}}"
+    regexp: "^lxc.idmap:.g {{ proxmoxy__provision_idmap_from|string + ' ' + proxmoxy__provision_idmap_start|string + ' ' + proxmoxy__provision_idmap_range|string }}"
+    line: "lxc.idmap: g {{ proxmoxy__provision_idmap_from|string + ' ' + proxmoxy__provision_idmap_start|string + ' ' + proxmoxy__provision_idmap_range|string }}"
+    create: no
+    state: present
+  when: proxmoxy__provision_idmapping
+  with_items: "{{ proxmoxy__provision_containers }}"
+
 # - debug:
 #     var: item.item.vmid
 #     verbosity: 1
@@ -113,7 +132,7 @@
   when: proxmoxy__provision_bootstrap_file|d('')|string|length
   become: False
 
-- name: Provision > write container to bootstrapping hosts file
+- name: Provision > write container to end of bootstrapping hosts file
   local_action: lineinfile dest='{{ proxmoxy__provision_bootstrap_file }}'
                 regexp="^{{ item.item.hostname|d() + ('.' + item.item.searchdomain if item.item.searchdomain is defined else '') }}.*$"
                 line='{{ item.item.hostname|d() + ("." + item.item.searchdomain if item.item.searchdomain is defined else "") }}
@@ -123,4 +142,6 @@
   when: not ansible_check_mode and proxmoxy__provision_bootstrap_file|d('')|string|length and item.item.vmid|string not in __proxmoxy_prov_reg_vmids.stdout_lines
   with_items:
     - "{{ __proxmoxy_register_containers.results|d([]) }}"
+  loop_control:
+    label: "{{ item.item.hostname|d('undefined') }}"
   become: False

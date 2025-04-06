@@ -31,9 +31,16 @@ proxmoxy__storage_changes: True  # Always set options, or don't
 proxmoxy__storage_remove: []  # storages to remove. Place here to recreate anew.
 
 ## Provision lxc containers
-proxmoxy__provision_secret: True  # read/save password to from folder "secret/cred/<host>/root/pw"
+proxmoxy__provision_secret: True  # read/save password to from folder "secret/credentials/<host>/root/pw"
 proxmoxy__provision_bridge: 'vmbr0'
 proxmoxy__provision_containers: []  # list of container configs
 proxmoxy__provision_post_cmds: []  # run commands in new containers
 proxmoxy__provision_bootstrap_file: 'hosts/bootstrap'  # if !="" write new containers into this file
 proxmoxy__provision_bootstrap_entry: 'bootstrap_hosts'  # inventory entry name
+proxmoxy__provision_config_path: '/etc/pve/local/lxc'
+proxmoxy__provision_idmapping: True
+# will map vm ids 0-1999 to 100000-101999 (on host)
+proxmoxy__provision_idmap_from: 0 
+# should match values in /etc/subuid
+proxmoxy__provision_idmap_start: 100000
+proxmoxy__provision_idmap_range: 65536

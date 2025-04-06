@@ -33,7 +33,7 @@
     name: "{{ item.value }}"
   with_dict: "{{ proxmoxy__host_modules }}"
 
-- name: Host > remove proxmox ui no-subscription warning message
+- name: Host > remove proxmox ui no-subscription warning message v1
   lineinfile:
     # not sure about version 5
     path: "{{ '/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js' if proxmoxy__pve_version is
@@ -41,6 +41,15 @@
     regexp: "(\\s*if \\(data.status !== 'Active')(\\) {)"
     line: '\1 && false\2'
     backrefs: yes
+  when: proxmoxy__host_remove_nosubnag
+
+# For version 7(.4 ?)
+- name: Host > remove proxmox ui no-subscription warning message v2
+  ansible.builtin.replace:
+    path: /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js
+    regexp: '\sExt.Msg.show\({'
+    before: 'title: gettext\(.No valid subscription.\)'
+    replace: ' void({ //Ext.Msg.show({'
   when: proxmoxy__host_remove_nosubnag
 
 # tbd lxc.mount.entry = /dev/net dev/net none bind,create=dir
