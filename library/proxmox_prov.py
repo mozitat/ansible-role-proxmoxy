@@ -1,17 +1,17 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 ANSIBLE_METADATA = {'status': ['preview'],
                     'supported_by': 'community',
-                    'version': '0.7'}
+                    'version': '0.8'}
 
 DOCUMENTATION = '''
 ---
 module: proxmox_prov
-short_description: management of LXC instances on Proxmox VE (4.x)
+short_description: management of LXC instances on Proxmox VE
 description:
   - has no dependencies and directly uses the local pvesh API interface on the host.
   - current status: "works for me"
-  - allows you to create/delete/stop LXC instances in Proxmox VE 4 cluster
+  - allows you to create/delete/stop LXC instances in Proxmox VE cluster
   - automatically creates container rootfs/mpX volumes via API if inexistent.
   - can resize rootfs/mpX volumes.
   - currently supports only lxc containers.

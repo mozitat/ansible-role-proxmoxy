@@ -1,6 +1,6 @@
 # Ansible Role: proxmoxy
 
-Configures proxmox 4.x hosts and provisions lxc vm containers. It does this by directly interfacing with the proxmox shell tools on the proxmox host. There is no direct dependency on the proxmox http API or libraries like proxmoxer.
+Configures proxmox (4.x - 8.x) hosts and provisions lxc vm containers. It does this by directly interfacing with the proxmox shell tools on the proxmox host. There is no direct dependency on the proxmox http API or libraries like proxmoxer.
 
 For container management it ships with the [proxmox_prov](library/proxmox_prov.py) Ansible module. 
 
