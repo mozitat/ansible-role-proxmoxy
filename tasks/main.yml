@@ -12,26 +12,26 @@
     # cacheable: yes
 
 # Host system
-- include: host.yml
+- ansible.builtin.include_tasks: host.yml
   tags:
     - proxmoxy
 
 # Permissions
-- include: permission.yml
+- ansible.builtin.include_tasks: permission.yml
   tags:
     - proxmoxy
 
 # Storage
-- include: storage.yml
+- ansible.builtin.include_tasks: storage.yml
   tags:
     - proxmoxy
 
 # Templates
-- include: templates.yml
+- ansible.builtin.include_tasks: templates.yml
   tags:
     - proxmoxy
 
 # Provisioning
-- include: prov.yml
+- ansible.builtin.include_tasks: prov.yml
   tags:
     - proxmoxy

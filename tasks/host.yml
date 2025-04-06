@@ -8,13 +8,22 @@
     repo: deb https://enterprise.proxmox.com/debian/pve {{ ansible_distribution_release }} pve-enterprise
     state: "{{ 'present' if proxmoxy__host_repo_enterprise else 'absent' }}"
     filename: pve-enterprise.list
+- name: Host > disable/enable proxmox enterprise ceph repo
+  apt_repository:
+    repo: deb https://enterprise.proxmox.com/debian/ceph-squid {{ ansible_distribution_release }} enterprise
+    state: "{{ 'present' if proxmoxy__host_repo_enterprise else 'absent' }}"
+    filename: ceph
 
 - name: enable/disable proxmox no-subscription repo
   apt_repository:
     repo: deb http://download.proxmox.com/debian/pve {{ ansible_distribution_release }} pve-no-subscription
     state: "{{ 'present' if proxmoxy__host_repo_nosubs else 'absent' }}"
     filename: pve-no-subscription
-
+- name: enable/disable proxmox no-subscription ceph repo
+  apt_repository:
+    repo: deb http://download.proxmox.com/debian/ceph-squid {{ ansible_distribution_release }} no-subscription
+    state: "{{ 'present' if proxmoxy__host_repo_nosubs else 'absent' }}"
+    filename: ceph
 
   # suggestion for firewall
   #   - 'xt_tcpudp'
